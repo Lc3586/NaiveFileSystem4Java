@@ -1,0 +1,182 @@
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为8080
+  port: 8080
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # 连接数满后的排队数，默认为100
+    accept-count: 1000
+    threads:
+      # tomcat最大线程数，默认为200
+      max: 800
+      # Tomcat启动初始化的线程数，默认值10
+      min-spare: 100
+
+# 日志配置
+logging:
+  level:
+    top.lctr: debug
+    org.springframework: warn
+
+# Spring配置
+spring:
+  profiles:
+    active: @env@
+  # 数据源配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: dm.jdbc.driver.DmDriver
+    druid:
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: ruoyi
+        login-password: 123456
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+  # json配置
+  jackson:
+    mapper:
+      # 接口反序列化参数时大小写不敏感
+      accept-case-insensitive-properties: true
+  # 资源信息
+  messages:
+    # 国际化资源文件路径
+    basename: i18n/messages
+
+# Swagger配置
+swagger:
+  # 是否开启swagger
+  enabled: true
+  # 请求前缀
+  pathMapping: /
+
+# 防止XSS攻击
+xss:
+  # 过滤开关
+  enabled: true
+  # 排除链接（多个用逗号分隔）
+  excludes: /system/notice
+  # 匹配链接
+  urlPatterns: /system/*,/monitor/*,/tool/*
+
+#项目拓展
+project:
+  extension:
+    mybatis:
+      # 需要扫描的存放实体类的包
+      scanEntitiesPackages: top.lctr.**.domain
+      # mybatis配置文件路径
+      configLocation: mybatis/mybatis-config.xml
+      # 默认的数据库类型
+      dbType: JdbcDameng
+      # 默认的实体类表明/列名命名规则
+      nameConvertType: PascalCaseToUnderscoreWithUpper
+      # 默认的连接字符串
+      connectionString: ENC(G4fMAaqhzJFnRF8Zcdzyv4A3YikVTm4g+FOjKdnfd8eMJFqyz+/2ZcWZT6izBFlFIrXS2m0e1UAf364h2/upJbzAeCFAaPzav0ebN0/85aHcRELTqIpK/4Md6TgqysgHrJK3WWNC4PedmPbYtevkNJ10r1iAb/64rORV3wvjRMZ+gAenTCSJQOSAkvkbmrKFADnZesf2IoJBlxMs3wK0a3fKoybwQAOClaNgOCegbilFlFE3o2NP+A==)
+      # 多数据源配置（单数据库时无需配置此项）
+      multiDataSource:
+        #主库
+        - name: master
+        #从库
+        - name: slave
+          dbType: JdbcSqlServer
+          nameConvertType: None
+          connectionString: ENC(Dg5XaaG9MyBD1Fj+y1hXkw+QNZB5NW0ictc8sx/ZggR0Fm6ny9g2vKFsMfSr66KUKgid1m3p5L8pcpMFcsEcQ/BqCyXsEce+JOrdqRxBRTE=)
+          enable: false
+
+#文件服务配置
+file:
+  #服务器标识
+  serverKey: 00000000-0000-0000-0000-000000000001
+  #站点资源文件根目录绝对路径
+  wwwRootDirectory: wwwroot
+  #图片默认预览宽度
+  previewWidth: 200
+  #图片默认预览高度
+  previewHeight: 200
+  #ffmpeg程序文件路径
+  #Windows
+  ffmpegFilePath: tools\ffmpeg\ffmpeg.exe
+  #Linux&OSX
+  #  ffmpegFilePath: /usr/bin/ffmpeg
+  #ffmpeg程序文件路径
+  #Windows
+  ffprobeFilePath: tools\ffmpeg\ffprobe.exe
+  #Linux&OSX
+  #  ffprobeFilePath: /usr/bin/ffprobe
+  #ffplay程序文件路径
+  #Windows
+  ffplayFilePath: tools\ffmpeg\ffplay.exe
+  #Linux&OSX
+  #  ffplayFilePath: /usr/bin/ffplay
+  #大文件上传模块
+  upload-large-file:
+    #启用
+    enable: true
+    #线程池大小
+    threadPoolSize: 1
+    #定时检查未完成的任务的时间间隔(m)
+    checkInterval: 10
+    #定时清理分片文件的时间间隔(h)
+    clearInterval: 1
+    #集线器
+    hubConfig:
+      enable: true
+      #消息处理线程池大小
+      handlerThreadPoolSize: -1
+      #消息发送线程池大小
+      senderThreadPoolSize: -1
+  #文件修复
+  repair:
+    #启用
+    enable: true
+    #线程池大小
+    threadPoolSize: 1
+    #定时检查待修复的文件的时间间隔(h)
+    checkInterval: 6
+    #集线器
+    hubConfig:
+      enable: true
+      #消息处理线程池大小
+      handlerThreadPoolSize: -1
+      #消息发送线程池大小
+      senderThreadPoolSize: -1
+  #Word文件自动转换为Pdf文件
+  word2pdf:
+    #启用
+    enable: true
+    #线程池大小
+    threadPoolSize: 1
+    #定时检查待转换的文件的时间间隔(h)
+    checkInterval: 24
+    #集线器
+    hubConfig:
+      enable: true
+      #消息处理线程池大小
+      handlerThreadPoolSize: -1
+      #消息发送线程池大小
+      senderThreadPoolSize: -1
+
+jasypt:
+  encryptor:
+    password: ${JAVA_JASYPT_PASSWORD}
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
