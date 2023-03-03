@@ -1,0 +1,14 @@
+# 日志配置
+logging:
+  level:
+    top.lctr: warn
+    org.springframework: warn
+
+#文件服务配置
+file:
+  #ffmpeg程序文件路径
+  ffmpegFilePath: /usr/bin/ffmpeg
+  #ffmpeg程序文件路径
+  ffprobeFilePath: /usr/bin/ffprobe
+  #ffplay程序文件路径
+  ffplayFilePath: /usr/bin/ffplay

@@ -5,10 +5,9 @@ package top.lctr.naive.file.system.entityFields;
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.CommonChunkFileMergeTask
+ * @see top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask
  */
-public class CFMT_Fields
-        extends Base_Fields {
+public class CFMT_Fields {
     /**
      * Id
      */
@@ -83,4 +82,14 @@ public class CFMT_Fields
      * 完成时间
      */
     public static final String completedTime = "completedTime";
+
+    /**
+     * 创建时间
+     */
+    public static final String createTime = "createTime";
+
+    /**
+     * 更新时间
+     */
+    public static final String updateTime = "updateTime";
 }

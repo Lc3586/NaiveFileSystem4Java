@@ -1,6 +1,6 @@
 package top.lctr.naive.file.system.business.service.Interface;
 
-import project.extension.standard.datasearch.TreeDataSearchDTO;
+import project.extension.mybatis.edge.extention.datasearch.TreeDataSearchDTO;
 import project.extension.standard.datasort.DataSortDTO;
 import project.extension.standard.datasort.TreeDragSortDTO;
 import project.extension.standard.exception.BusinessException;
@@ -124,12 +124,8 @@ public interface IFileUploadConfigService {
     /**
      * 获取配置类型信息
      *
-     * @param code              编码
-     * @param withTransactional 是否在事务下运行
+     * @param code 编码
      * @return 类型信息
      */
-    GetReferenceConfigFunUse_Types getConfigTypes(String code,
-                                                  boolean withTransactional)
-            throws
-            Exception;
+    GetReferenceConfigFunUse_Types getConfigTypes(String code);
 }

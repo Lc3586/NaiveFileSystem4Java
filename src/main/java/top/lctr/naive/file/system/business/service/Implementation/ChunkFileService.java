@@ -2,23 +2,23 @@ package top.lctr.naive.file.system.business.service.Implementation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import project.extension.file.FileExtension;
-import project.extension.mybatis.edge.INaiveSql;
-import project.extension.mybatis.edge.core.repository.IBaseRepository_Key;
+import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
+import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
 import project.extension.tuple.Tuple2;
 import top.lctr.naive.file.system.business.service.Interface.IChunkFileService;
+import top.lctr.naive.file.system.config.ServiceConfig;
 import top.lctr.naive.file.system.dto.FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_ForMerge;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_Indices;
-import top.lctr.naive.file.system.entity.CommonChunkFile;
+import top.lctr.naive.file.system.entity.common.CommonChunkFile;
 import top.lctr.naive.file.system.entityFields.CF_Fields;
 
 import java.nio.file.Paths;
@@ -38,12 +38,12 @@ import java.util.List;
 public class ChunkFileService
         implements IChunkFileService {
     public ChunkFileService(IEntityExtension entityExtension,
-                            INaiveSql naiveSql)
-            throws
-            Throwable {
+                            INaiveSql naiveSql,
+                            ServiceConfig serviceConfig) {
         this.entityExtension = entityExtension;
         this.repository_Key = naiveSql.getRepository_Key(CommonChunkFile.class,
                                                          String.class);
+        this.serviceConfig = serviceConfig;
     }
 
     private final IEntityExtension entityExtension;
@@ -55,26 +55,12 @@ public class ChunkFileService
      */
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * 服务器标识
-     */
-    @Value("${file.serverKey}")
-    private String serverKey;
-
-    /**
-     * 站点资源文件根目录绝对路径
-     */
-    @Value("${file.wwwRootDirectory}")
-    private String wwwRootDirectory;
+    private final ServiceConfig serviceConfig;
 
     @Override
     public FunUse_FileState getFileState(String md5,
-                                         Integer specs,
-                                         boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                         Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CF_Fields.md5,
                                                FilterCompare.Eq,
                                                md5)
@@ -83,7 +69,7 @@ public class ChunkFileService
                                                specs)
                                           .and(CF_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .orderBy(String.format("(CASE WHEN state='%s' THEN 1 ELSE 0 END) DESC, (CASE WHEN state='%s' THEN 1 ELSE 0 END) DESC",
                                                     FileState.可用,
                                                     FileState.上传中))
@@ -92,12 +78,8 @@ public class ChunkFileService
 
     @Override
     public Long chunkFileAlreadyCount(String fileMd5,
-                                      Integer specs,
-                                      boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                      Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CF_Fields.fileMd5,
                                                FilterCompare.Eq,
                                                fileMd5)
@@ -109,18 +91,14 @@ public class ChunkFileService
                                                FileState.可用)
                                           .and(CF_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .count();
     }
 
     @Override
     public List<FunUse_ForMerge> chunkFileAlreadyList(String fileMd5,
-                                                      Integer specs,
-                                                      boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                                      Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CF_Fields.fileMd5,
                                                FilterCompare.Eq,
                                                fileMd5)
@@ -132,19 +110,15 @@ public class ChunkFileService
                                                FileState.可用)
                                           .and(CF_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .orderBy(x -> x.orderBy(CF_Fields.index))
                              .toList(FunUse_ForMerge.class);
     }
 
     @Override
     public List<FunUse_Indices> chunkFileIndicesList(String fileMd5,
-                                                     Integer specs,
-                                                     boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                                     Integer specs) {
+        return repository_Key.select()
                              .withSql(
                                      "SELECT inner_cf.\"INDEX\", COUNT(1) AS \"COUNT\" FROM common_chunk_file AS inner_cf \n"
                                              + "\tWHERE inner_cf.\"FILE_MD5\" = @fileMd5  AND inner_cf.\"SPECS\" = @specs  AND inner_cf.\"SERVER_KEY\" = @serverKey \n"
@@ -154,19 +128,15 @@ public class ChunkFileService
                                                    new Tuple2<>("specs",
                                                                 specs),
                                                    new Tuple2<>("serverKey",
-                                                                serverKey)))
+                                                                serviceConfig.getKey())))
                              .orderBy(x -> x.orderBy(CF_Fields.index))
                              .toList(FunUse_Indices.class);
     }
 
     @Override
     public Date lastUploadedChunkFileCreateTime(String fileMd5,
-                                                Integer specs,
-                                                boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                                Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CF_Fields.fileMd5,
                                                FilterCompare.Eq,
                                                fileMd5)
@@ -178,7 +148,7 @@ public class ChunkFileService
                                                FileState.已删除)
                                           .and(CF_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .orderBy(x -> x.orderByDescending(CF_Fields.createTime))
                              .first(CF_Fields.createTime,
                                     Date.class);
@@ -190,14 +160,12 @@ public class ChunkFileService
                                   String md5,
                                   int index,
                                   int specs,
-                                  String path,
-                                  boolean withTransactional)
+                                  String path)
             throws
             BusinessException {
         try {
             //是否已存在相同的分片
-            String id = repository_Key.withTransactional(withTransactional)
-                                      .select()
+            String id = repository_Key.select()
                                       .columns(CF_Fields.id)
                                       .where(x ->
                                                      x.and(CF_Fields.taskKey,
@@ -213,7 +181,7 @@ public class ChunkFileService
 
             CommonChunkFile data = new CommonChunkFile();
             data.setTaskKey(taskKey);
-            data.setServerKey(serverKey);
+            data.setServerKey(serviceConfig.getKey());
             data.setFileMd5(file_md5);
             data.setMd5(md5);
             data.setIndex(index);
@@ -234,13 +202,11 @@ public class ChunkFileService
     public void update(String taskKey,
                        String md5,
                        Long bytes,
-                       String relativePath,
-                       boolean withTransactional)
+                       String relativePath)
             throws
             BusinessException {
         try {
-            if (!repository_Key.withTransactional(withTransactional)
-                               .select()
+            if (!repository_Key.select()
                                .where(x ->
                                               x.and(CF_Fields.taskKey,
                                                     FilterCompare.Eq,
@@ -280,19 +246,16 @@ public class ChunkFileService
     }
 
     @Override
-    public void delete(Collection<String> ids,
-                       boolean withTransactional)
+    public void delete(Collection<String> ids)
             throws
             BusinessException {
         try {
-            List<FunUse_ForMerge> chunkFiles = repository_Key.withTransactional(withTransactional)
-                                                             .select()
+            List<FunUse_ForMerge> chunkFiles = repository_Key.select()
                                                              .where(x -> x.and(CF_Fields.id,
                                                                                FilterCompare.InSet,
                                                                                ids))
                                                              .toList(FunUse_ForMerge.class);
-            clear(chunkFiles,
-                  withTransactional);
+            clear(chunkFiles);
         } catch (Exception ex) {
             throw new BusinessException("删除数据失败",
                                         ex);
@@ -301,13 +264,11 @@ public class ChunkFileService
 
     @Override
     public void clear(String file_md5,
-                      int specs,
-                      boolean withTransactional)
+                      int specs)
             throws
             BusinessException {
         try {
-            List<FunUse_ForMerge> chunkFiles = repository_Key.withTransactional(withTransactional)
-                                                             .select()
+            List<FunUse_ForMerge> chunkFiles = repository_Key.select()
                                                              .where(x -> x.and(CF_Fields.fileMd5,
                                                                                FilterCompare.Eq,
                                                                                file_md5)
@@ -318,8 +279,7 @@ public class ChunkFileService
                                                                                FilterCompare.Eq,
                                                                                FileState.可用))
                                                              .toList(FunUse_ForMerge.class);
-            clear(chunkFiles,
-                  withTransactional);
+            clear(chunkFiles);
         } catch (BusinessException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -329,8 +289,7 @@ public class ChunkFileService
     }
 
     @Override
-    public void clear(Collection<FunUse_ForMerge> chunkFiles,
-                      boolean withTransactional)
+    public void clear(Collection<FunUse_ForMerge> chunkFiles)
             throws
             BusinessException {
         try {
@@ -343,8 +302,7 @@ public class ChunkFileService
                         throw new BusinessException("删除分片文件失败");
                 }
 
-                if (repository_Key.withTransactional(withTransactional)
-                                  .updateDiy()
+                if (repository_Key.updateDiy()
                                   .set(CF_Fields.state,
                                        FileState.已删除)
                                   .where(x -> x.and(CF_Fields.id,
@@ -363,7 +321,7 @@ public class ChunkFileService
 
     @Override
     public String getWWWRootDirectory() {
-        return wwwRootDirectory;
+        return serviceConfig.getWwwRootDirectory();
     }
 
     @Override

@@ -31,7 +31,7 @@ import top.lctr.naive.file.system.dto.fileUploadConfigDTO.Config;
 import top.lctr.naive.file.system.dto.fileUploadDTO.PreUploadChunkFileResponse;
 import top.lctr.naive.file.system.dto.fileUploadDTO.PreUploadFileResponse;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.CommonFile;
+import top.lctr.naive.file.system.entity.common.CommonFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -63,12 +63,10 @@ public class FileUploadService
                              IChunkFileService chunkFileService,
                              ChunkFileMergeHandler chunkFileMergeHandler,
                              Word2PdfHandler word2PdfHandler,
-                             IAuthenticationService authenticationService)
-            throws
-            Throwable {
+                             IAuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
         ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
-        if (servletRequestAttributes == null) throw new Exception("获取ServletRequestAttributes对象失败");
+        if (servletRequestAttributes == null) throw new BusinessException("获取ServletRequestAttributes对象失败");
         this.request = servletRequestAttributes.getRequest();
         this.fileService = fileService;
         this.personalFileService = personalFileService;
@@ -232,15 +230,11 @@ public class FileUploadService
      */
     private FunUse_FileState getFileState(String md5,
                                           boolean chunk,
-                                          Integer specs)
-            throws
-            Exception {
+                                          Integer specs) {
         FunUse_FileState state = chunk
                                  ? chunkFileService.getFileState(md5,
-                                                                 specs,
-                                                                 true)
-                                 : fileService.getFileState(md5,
-                                                            true);
+                                                                 specs)
+                                 : fileService.getFileState(md5);
 
         if (state == null) state = new FunUse_FileState(null,
                                                         FileState.未上传,
@@ -250,11 +244,9 @@ public class FileUploadService
         else if (state.getState()
                       .equals(FileState.可用) && !new File(fileService.getFilePath(state.getPath())).exists()) {
             if (chunk)
-                chunkFileService.delete(Collections.singletonList(state.getId()),
-                                        true);
+                chunkFileService.delete(Collections.singletonList(state.getId()));
             else
-                fileService.delete(Collections.singletonList(state.getId()),
-                                   true);
+                fileService.delete(Collections.singletonList(state.getId()));
 
             state.setState(FileState.已删除);
             state.setPath(null);
@@ -277,7 +269,6 @@ public class FileUploadService
                                  Long length)
             throws
             Exception {
-
         //在数据库中存储相对路径
         String relativePath = Paths.get("upload",
                                         new SimpleDateFormat("yyyy-MM-dd").format(
@@ -308,8 +299,7 @@ public class FileUploadService
         chunkFileService.update(key,
                                 md5,
                                 length,
-                                relativePath,
-                                true);
+                                relativePath);
     }
 
     /**
@@ -434,19 +424,16 @@ public class FileUploadService
                                              length,
                                              relativePath,
                                              storageType,
-                                             FileState.可用,
-                                             true);
+                                             FileState.可用);
 
         //新增个人文件信息
         String personalFileId = personalFileService.create(configCode,
                                                            personalFilename,
                                                            extension,
                                                            file.getId(),
-                                                           PersonalFileState.可用,
-                                                           true);
+                                                           PersonalFileState.可用);
 
-        return personalFileService.detail(personalFileId,
-                                          true);
+        return personalFileService.detail(personalFileId);
     }
 
     @Override
@@ -493,8 +480,7 @@ public class FileUploadService
                                                               PersonalFileState.可用,
                                                               authenticationService.tryGetOperator()
                                                                                    .orElse(new Operator())
-                                                                                   .getUsername(),
-                                                              true);
+                                                                                   .getUsername());
                 } catch (Exception ignore) {
 
                 }
@@ -504,11 +490,9 @@ public class FileUploadService
                                                                 filename,
                                                                 extension,
                                                                 state.getId(),
-                                                                PersonalFileState.可用,
-                                                                true);
+                                                                PersonalFileState.可用);
 
-                result.setPersonalFile(personalFileService.detail(personalFileId,
-                                                                  true));
+                result.setPersonalFile(personalFileService.detail(personalFileId));
             } else if (section) {
                 //文件未上传，但是分片上传时需要提前添加分片文件合并的任务
                 if (!enableUploadLargeFile) throw new BusinessException("未启用大文件上传功能");
@@ -519,8 +503,7 @@ public class FileUploadService
                                           extension,
                                           filename,
                                           specs,
-                                          total,
-                                          true);
+                                          total);
             }
 
             return result;
@@ -583,8 +566,7 @@ public class FileUploadService
                                             md5,
                                             index,
                                             specs,
-                                            state.getPath(),
-                                            true);
+                                            state.getPath());
             }
             return result;
         } catch (BusinessException ex) {
@@ -675,14 +657,12 @@ public class FileUploadService
                                                               PersonalFileState.可用,
                                                               authenticationService.tryGetOperator()
                                                                                    .orElse(new Operator())
-                                                                                   .getUsername(),
-                                                              true);
+                                                                                   .getUsername());
                 } catch (Exception ignore) {
 
                 }
 
-                if (personalFileId != null) return personalFileService.detail(personalFileId,
-                                                                              true);
+                if (personalFileId != null) return personalFileService.detail(personalFileId);
 
                 fileId = state.getId();
             } else {
@@ -694,8 +674,7 @@ public class FileUploadService
                                                      0L,
                                                      null,
                                                      StorageType.相对路径,
-                                                     FileState.处理中,
-                                                     true);
+                                                     FileState.处理中);
 
                 fileId = file.getId();
             }
@@ -705,17 +684,14 @@ public class FileUploadService
                                                                filename,
                                                                extension,
                                                                fileId,
-                                                               PersonalFileState.可用,
-                                                               true);
+                                                               PersonalFileState.可用);
 
             //处理分片文件合并任务
             chunkFileMergeHandler.handler(file_md5,
                                           specs,
-                                          total,
-                                          true);
+                                          total);
 
-            return personalFileService.detail(personalFileId,
-                                              true);
+            return personalFileService.detail(personalFileId);
         } catch (BusinessException ex) {
             throw ex;
         } catch (Exception ex) {

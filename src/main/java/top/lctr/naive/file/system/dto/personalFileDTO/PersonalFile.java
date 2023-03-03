@@ -9,8 +9,8 @@ import project.extension.mybatis.edge.annotations.EntityMappingSetting;
 import project.extension.openapi.annotations.OpenApiDescription;
 import project.extension.openapi.annotations.OpenApiMainTag;
 import project.extension.openapi.annotations.OpenApiMainTags;
-import top.lctr.naive.file.system.entity.CommonFile;
-import top.lctr.naive.file.system.entity.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;

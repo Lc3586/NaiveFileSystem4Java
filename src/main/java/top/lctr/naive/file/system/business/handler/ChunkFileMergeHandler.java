@@ -8,7 +8,6 @@ import project.extension.file.FileExtension;
 import project.extension.number.DecimalExtension;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
-import project.extension.task.ActionTimerTask;
 import project.extension.task.TaskExtension;
 import project.extension.task.TaskQueueHandler;
 import project.extension.tuple.Tuple2;
@@ -25,7 +24,7 @@ import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_ForMerge;
 import top.lctr.naive.file.system.dto.chunkFileMergeTaskDTO.ActivityInfo;
 import top.lctr.naive.file.system.dto.chunkFileMergeTaskDTO.ChunksSourceInfo;
-import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
 import top.lctr.naive.file.system.entityFields.CFMT_Fields;
 
 import java.io.File;
@@ -42,12 +41,12 @@ import java.util.stream.Collectors;
 
 /**
  * 文件服务
- * <p>分片文件合并任务处理类</p>
+ * <p>分片文件合并模块</p>
  *
  * @author LCTR
  * @date 2022-12-08
  */
-@Component("ChunkFileMergeHandler")
+@Component
 public class ChunkFileMergeHandler
         extends TaskQueueHandler {
     public ChunkFileMergeHandler(UploadLargeFileConfig config,
@@ -57,7 +56,7 @@ public class ChunkFileMergeHandler
                                  ChunkFileClearHandler chunkFileClearHandler,
                                  FileMergeHubHandler fileMergeHubHandler,
                                  IEntityExtension entityExtension) {
-        super("分片文件合并任务处理类",
+        super("分片文件合并模块",
               config.getThreadPoolSize(),
               LoggerFactory.getLogger(ChunkFileMergeHandler.class));
         this.config = config;
@@ -95,19 +94,26 @@ public class ChunkFileMergeHandler
 
     private final IEntityExtension entityExtension;
 
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     /**
      * 启动
      */
-    @Override
     public void start() {
         if (!config.isEnable())
             return;
 
-        //同步启动清理分片文件处理类
-        chunkFileClearHandler.start();
+        super.start(true,
+                    () -> {
+                        //同步启动清理分片文件处理类
+                        chunkFileClearHandler.start();
+                        return true;
+                    });
 
-        super.start();
+        logger.info(String.format("%s：已启动",
+                                  getName()));
 
+        //开始定时检查未完成的任务
         startCheck(null);
     }
 
@@ -120,33 +126,33 @@ public class ChunkFileMergeHandler
         chunkFileClearHandler.shutDown();
 
         super.shutDown();
+
+        logger.info(String.format("%s：已关闭",
+                                  getName()));
     }
 
     /**
      * 新增任务
      *
-     * @param md5               文件MD5值
-     * @param contentType       文件内容类型
-     * @param extension         文件拓展名
-     * @param name              文件名(不包括拓展名)
-     * @param specs             分片规格
-     * @param total             分片总数
-     * @param withTransactional 是否在事务下运行
+     * @param md5         文件MD5值
+     * @param contentType 文件内容类型
+     * @param extension   文件拓展名
+     * @param name        文件名(不包括拓展名)
+     * @param specs       分片规格
+     * @param total       分片总数
      */
     public void add(String md5,
                     String contentType,
                     String extension,
                     String name,
                     int specs,
-                    int total,
-                    boolean withTransactional)
+                    int total)
             throws
             Exception {
         //如任务已存在，则忽略
         if (chunkFileMergeTaskService.isAlreadyExist(md5,
                                                      specs,
-                                                     total,
-                                                     withTransactional))
+                                                     total))
             return;
 
         CommonChunkFileMergeTask task
@@ -156,103 +162,60 @@ public class ChunkFileMergeHandler
                                                    name,
                                                    specs,
                                                    total,
-                                                   CFMTState.上传中,
-                                                   withTransactional);
+                                                   CFMTState.上传中);
 
         stateMap.put(task.getId(),
                      task);
 
-        super.addScheduleTask(new ActionTimerTask<>((state) -> beginSendChunksSourceInfoTask(state.a,
-                                                                                             state.b,
-                                                                                             state.c,
-                                                                                             state.d),
-                                                    new Tuple4<>(task.getId(),
-                                                                 md5,
-                                                                 specs,
-                                                                 total)),
+        super.addScheduleTask((state) -> beginSendChunksSourceInfoTask(state.a,
+                                                                       state.b,
+                                                                       state.c,
+                                                                       state.d),
+                              new Tuple4<>(task.getId(),
+                                           md5,
+                                           specs,
+                                           total),
                               1000);
 
         //推送实时信息
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Map<String, Object> sendData = new HashMap<>();
-        sendData.put(CFMT_Fields.id,
-                     task.getId());
-        sendData.put(CFMT_Fields.serverKey,
-                     task.getServerKey());
-        sendData.put(CFMT_Fields.md5,
-                     task.getMd5());
-        sendData.put(CFMT_Fields.name,
-                     task.getName());
-        sendData.put(CFMT_Fields.contentType,
-                     task.getContentType());
-        sendData.put(CFMT_Fields.extension,
-                     task.getExtension());
-        sendData.put(CFMT_Fields.bytes,
-                     task.getBytes());
-        sendData.put(CFMT_Fields.size,
-                     task.getSize());
-        sendData.put(CFMT_Fields.specs,
-                     task.getSpecs());
-        sendData.put(CFMT_Fields.total,
-                     task.getTotal());
-        sendData.put(CFMT_Fields.state,
-                     task.getState());
-        sendData.put(CFMT_Fields.info,
-                     task.getInfo());
-        if (task.getCreateTime() != null)
-            sendData.put(CFMT_Fields.createTime,
-                         dateFormat.format(task.getCreateTime()));
-        if (task.getUpdateTime() != null)
-            sendData.put(CFMT_Fields.updateTime,
-                         dateFormat.format(task.getUpdateTime()));
-        if (task.getCompletedTime() != null)
-            sendData.put(CFMT_Fields.completedTime,
-                         dateFormat.format(task.getCompletedTime()));
-        sendUpdateData(task.getId(),
-                       sendData);
+        sendTaskInfo(task,
+                     true);
     }
 
     /**
      * 处理合并任务
      *
-     * @param md5               文件md5
-     * @param specs             分片规格
-     * @param total             分片总数
-     * @param withTransactional 是否在事务下运行
+     * @param md5   文件md5
+     * @param specs 分片规格
+     * @param total 分片总数
      */
     public void handler(String md5,
                         int specs,
-                        int total,
-                        boolean withTransactional)
+                        int total)
             throws
             Exception {
         //检查任务是否存在
         if (!chunkFileMergeTaskService.isAlreadyExist(md5,
                                                       specs,
-                                                      total,
-                                                      withTransactional))
+                                                      total))
             throw new BusinessException("未创建分片文件合并任务信息");
 
         CommonChunkFileMergeTask task = chunkFileMergeTaskService.getAlreadyTask(md5,
                                                                                  specs,
-                                                                                 total,
-                                                                                 withTransactional);
+                                                                                 total);
 
         task.setState(CFMTState.等待处理);
-        chunkFileMergeTaskService.update(entityExtension.modify(task),
-                                         withTransactional);
+        chunkFileMergeTaskService.update(entityExtension.modify(task));
 
         //推送实时信息
-        Map<String, Object> sendData = new HashMap<>();
-        sendData.put(CFMT_Fields.state,
-                     CFMTState.等待处理);
-        sendUpdateData(task.getId(),
-                       sendData);
+        sendTaskInfo(task,
+                     false,
+                     CFMT_Fields.state);
 
         //延迟追加至队列处理
-        super.addScheduleTask(new ActionTimerTask<>(state -> super.addTask(state,
-                                                                           true),
-                                                    task.getId()),
+        super.addScheduleTask(state -> super.addTask(state,
+                                                     true),
+                              task.getId(),
                               1000);
     }
 
@@ -262,19 +225,21 @@ public class ChunkFileMergeHandler
     private void startCheck(Object state) {
         try {
             //将未完成的任务添加至队列
-            chunkFileMergeTaskService.getUnfinishedIdList(false)
+            chunkFileMergeTaskService.getUnfinishedIdList()
                                      .forEach(x -> super.addTask(x,
                                                                  false));
 
             super.handler();
         } catch (Exception ex) {
-            logger.warn("添加未完成的任务至队列失败",
-                        ex);
+            logger.error(String.format("%s：添加未完成的任务至队列失败，%s",
+                                       getName(),
+                                       ex.getMessage()),
+                         ex);
         }
 
         //添加定时任务定时检查未完成的任务
-        super.addScheduleTask(new ActionTimerTask<>(this::startCheck,
-                                                    null),
+        super.addScheduleTask(this::startCheck,
+                              null,
                               config.getCheckInterval() * 60 * 1000L);
     }
 
@@ -284,13 +249,11 @@ public class ChunkFileMergeHandler
      * @param id 任务id
      * @return a: 任务是否存在，b: 任务信息
      */
-    private Tuple2<Boolean, CommonChunkFileMergeTask> tryGetTask(String id)
-            throws
-            Exception {
-        CommonChunkFileMergeTask task = chunkFileMergeTaskService.get(id,
-                                                                      true);
+    private Tuple2<Boolean, CommonChunkFileMergeTask> tryGetTask(String id) {
+        CommonChunkFileMergeTask task = chunkFileMergeTaskService.get(id);
         if (task == null) {
-            logger.warn(String.format("合并分片文件失败, 指定的任务不存在[ID: %s]",
+            logger.warn(String.format("%s：合并分片文件失败, 指定的任务不存在[ID: %s]",
+                                      getName(),
                                       id));
             return new Tuple2<>(false,
                                 null);
@@ -305,11 +268,8 @@ public class ChunkFileMergeHandler
      * @param task 任务信息
      * @return 是否已完成
      */
-    private boolean isAlreadyComplete(CommonChunkFileMergeTask task)
-            throws
-            Exception {
-        FunUse_FileState state = fileService.getFileState(task.getMd5(),
-                                                          false);
+    private boolean isAlreadyComplete(CommonChunkFileMergeTask task) {
+        FunUse_FileState state = fileService.getFileState(task.getMd5());
         if (state != null && state.getState()
                                   .equals(FileState.可用)) {
             task.setState(CFMTState.待清理);
@@ -317,13 +277,14 @@ public class ChunkFileMergeHandler
                 //文件已存在
                 fileService.updateFileState(task.getMd5(),
                                             FileState.可用,
-                                            state.getPath(),
-                                            false);
+                                            state.getPath());
                 task.setInfo("任务已完成.");
             } catch (Exception ex) {
-                logger.warn(String.format("更新文件状态信息失败, 任务[ID: %s]",
-                                          task.getId()),
-                            ex);
+                logger.error(String.format("%s：更新文件状态信息失败, 任务[ID: %s]，%s",
+                                           getName(),
+                                           task.getId(),
+                                           ex.getMessage()),
+                             ex);
                 task.setInfo("任务已完成，但更新文件状态信息失败.");
             }
 
@@ -342,27 +303,20 @@ public class ChunkFileMergeHandler
      * @param task 任务信息
      * @return a：是否需要处理，b：全部分片文件，c：合并所需的分片文件
      */
-    private Tuple3<Boolean, List<FunUse_ForMerge>, List<FunUse_ForMerge>> tryGetChunkFiles(CommonChunkFileMergeTask task)
-            throws
-            Exception {
+    private Tuple3<Boolean, List<FunUse_ForMerge>, List<FunUse_ForMerge>> tryGetChunkFiles(CommonChunkFileMergeTask task) {
         //分片文件是否已全部上传
         long chunkFileCount = chunkFileService.chunkFileAlreadyCount(task.getMd5(),
-                                                                     task.getSpecs(),
-                                                                     false);
+                                                                     task.getSpecs());
         if (chunkFileCount != task.getTotal()) {
             //更新任务信息
             task.setInfo("分片文件还未全部上传完毕.");
-            chunkFileMergeTaskService.update(entityExtension.modify(task),
-                                             false);
+            chunkFileMergeTaskService.update(entityExtension.modify(task));
 
             //推送实时信息
-            Map<String, Object> sendData = new HashMap<>();
-            sendData.put(CFMT_Fields.info,
-                         task.getInfo());
-            sendData.put(CFMT_Fields.updateTime,
-                         task.getUpdateTime());
-            sendUpdateData(task.getId(),
-                           sendData);
+            sendTaskInfo(task,
+                         false,
+                         CFMT_Fields.info,
+                         CFMT_Fields.updateTime);
 
             return new Tuple3<>(false,
                                 null,
@@ -372,8 +326,7 @@ public class ChunkFileMergeHandler
         //获取全部分片文件
         List<FunUse_ForMerge> allChunkFiles
                 = chunkFileService.chunkFileAlreadyList(task.getMd5(),
-                                                        task.getSpecs(),
-                                                        false);
+                                                        task.getSpecs());
 
         //需要删除的分片文件Id集合
         List<String> needRemoveChunkFileIds = new ArrayList<>();
@@ -390,8 +343,7 @@ public class ChunkFileMergeHandler
 
         //删除已损坏的分片文件
         if (CollectionsExtension.anyPlus(needRemoveChunkFileIds))
-            chunkFileService.delete(needRemoveChunkFileIds,
-                                    false);
+            chunkFileService.delete(needRemoveChunkFileIds);
 
         //分片文件按索引分组
         Map<Integer, List<FunUse_ForMerge>> allChunkFileGroupMap
@@ -429,9 +381,7 @@ public class ChunkFileMergeHandler
      * @param needChunkFiles 合并所需的分片文件
      */
     private void merge(CommonChunkFileMergeTask task,
-                       List<FunUse_ForMerge> needChunkFiles)
-            throws
-            Exception {
+                       List<FunUse_ForMerge> needChunkFiles) {
         //更新任务信息
         task.setState(CFMTState.处理中);
         task.setInfo("分片文件合并中.");
@@ -484,20 +434,14 @@ public class ChunkFileMergeHandler
                 //更新任务信息
                 task.setCurrentChunkIndex(chunkFile.getIndex());
                 task.setBytes(task.getBytes() + chunkFile.getBytes());
-                chunkFileMergeTaskService.update(entityExtension.modify(task),
-                                                 false);
+                chunkFileMergeTaskService.update(entityExtension.modify(task));
 
                 //推送实时信息
-                Map<String, Object> sendData = new HashMap<>();
-                sendData.put(CFMT_Fields.currentChunkIndex,
-                             task.getCurrentChunkIndex());
-                sendData.put(CFMT_Fields.bytes,
-                             task.getBytes());
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                sendData.put(CFMT_Fields.updateTime,
-                             dateFormat.format(task.getUpdateTime()));
-                sendUpdateData(task.getId(),
-                               sendData);
+                sendTaskInfo(task,
+                             false,
+                             CFMT_Fields.currentChunkIndex,
+                             CFMT_Fields.bytes,
+                             CFMT_Fields.updateTime);
             }
         } catch (Exception ex) {
             throw new BusinessException("合并文件失败",
@@ -514,13 +458,10 @@ public class ChunkFileMergeHandler
      * @param task 任务信息
      * @return 是否成功
      */
-    private boolean completed(CommonChunkFileMergeTask task)
-            throws
-            Exception {
+    private boolean completed(CommonChunkFileMergeTask task) {
         task.setState(CFMTState.待清理);
         task.setCompletedTime(new Date());
-        chunkFileMergeTaskService.update(entityExtension.modify(task),
-                                         false);
+        chunkFileMergeTaskService.update(entityExtension.modify(task));
 
         try {
             fileService.update(task.getMd5(),
@@ -531,17 +472,18 @@ public class ChunkFileMergeHandler
                                task.getPath(),
                                StorageType.相对路径,
                                FileState.可用,
-                               true,
-                               false);
+                               true);
 
             //更新任务信息
             task.setInfo("已合并所有分片文件.");
             updateAndSendUpdateData(task);
             return true;
         } catch (Exception ex) {
-            logger.warn(String.format("更新文件信息失败, 任务[ID: %s]",
-                                      task.getId()),
-                        ex);
+            logger.error(String.format("%s：更新文件信息失败, 任务[ID: %s]，%s",
+                                       getName(),
+                                       task.getId(),
+                                       ex.getMessage()),
+                         ex);
 
             //更新任务信息
             task.setInfo("合并分片文件成功, 但更新文件信息失败.");
@@ -564,8 +506,8 @@ public class ChunkFileMergeHandler
         //判断设备是否已被占用
         if (super.containsConcurrentTask(task.getMd5())) {
             //延时添加至队列，等待下次处理
-            super.addScheduleTask(new ActionTimerTask<>(super::addTask,
-                                                        taskKey),
+            super.addScheduleTask(super::addTask,
+                                  taskKey,
                                   1000L);
             return;
         }
@@ -590,8 +532,7 @@ public class ChunkFileMergeHandler
 //            Tuple2<Boolean, Exception> result = RepositoryExtension.runTransaction(() -> {
             //判断任务信息是否已失效
             if (chunkFileMergeTaskService.isExpire(arTask.get()
-                                                         .getId(),
-                                                   false))
+                                                         .getId()))
                 return;
 
             //任务是否早已完成
@@ -599,9 +540,9 @@ public class ChunkFileMergeHandler
                 //完成后更新数据
                 if (!completed(arTask.get()))
                     //添加定时任务等待一段时间后再次尝试
-                    super.addScheduleTask(new ActionTimerTask<>(this::addTask,
-                                                                arTask.get()
-                                                                      .getId()),
+                    super.addScheduleTask(this::addTask,
+                                          arTask.get()
+                                                .getId(),
                                           10000L);
                 return;
             }
@@ -622,9 +563,9 @@ public class ChunkFileMergeHandler
             //完成后更新数据
             if (!completed(arTask.get()))
                 //添加定时任务等待一段时间后再次尝试
-                super.addScheduleTask(new ActionTimerTask<>(this::addTask,
-                                                            arTask.get()
-                                                                  .getId()),
+                super.addScheduleTask(this::addTask,
+                                      arTask.get()
+                                            .getId(),
                                       10000L);
 //            });
 //
@@ -656,23 +597,27 @@ public class ChunkFileMergeHandler
                                                 .getId());
         } catch (Exception ex) {
             String error = "处理分片文件合并任务时异常";
-            logger.error(error,
+
+            logger.error(String.format("%s：%s，%s",
+                                       getName(),
+                                       error,
+                                       ex.getMessage()),
                          ex);
 
             //推送实时信息
-            Map<String, Object> sendData = new HashMap<>();
-            sendData.put(CFMT_Fields.info,
-                         error);
-            sendData.put("exception",
-                         ex.toString());
-            sendData.put(CFMT_Fields.state,
-                         CFMTState.失败);
-            sendUpdateData(task.getId(),
-                           sendData);
+            sendTaskInfo(task,
+                         false,
+                         CFMT_Fields.info,
+                         CFMT_Fields.state);
+            Map<String, Object> data = new HashMap<>();
+            data.put("exception",
+                     ex.toString());
+            sendData(task.getId(),
+                     data);
 
             //添加定时任务等待一段时间后再次尝试
-            super.addScheduleTask(new ActionTimerTask<>(this::addTask,
-                                                        task.getId()),
+            super.addScheduleTask(this::addTask,
+                                  task.getId(),
                                   10000L);
         }
     }
@@ -682,27 +627,16 @@ public class ChunkFileMergeHandler
      *
      * @param task 合并任务
      */
-    private void updateAndSendUpdateData(CommonChunkFileMergeTask task)
-            throws
-            Exception {
-        chunkFileMergeTaskService.update(entityExtension.modify(task),
-                                         false);
+    private void updateAndSendUpdateData(CommonChunkFileMergeTask task) {
+        chunkFileMergeTaskService.update(entityExtension.modify(task));
 
         //推送实时信息
-        Map<String, Object> sendData = new HashMap<>();
-        sendData.put(CFMT_Fields.state,
-                     task.getState());
-        sendData.put(CFMT_Fields.info,
-                     task.getInfo());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (task.getUpdateTime() != null)
-            sendData.put(CFMT_Fields.updateTime,
-                         dateFormat.format(task.getUpdateTime()));
-        if (task.getCompletedTime() != null)
-            sendData.put(CFMT_Fields.completedTime,
-                         dateFormat.format(task.getCompletedTime()));
-        sendUpdateData(task.getId(),
-                       sendData);
+        sendTaskInfo(task,
+                     false,
+                     CFMT_Fields.state,
+                     CFMT_Fields.info,
+                     CFMT_Fields.updateTime,
+                     CFMT_Fields.completedTime);
     }
 
     /**
@@ -757,9 +691,7 @@ public class ChunkFileMergeHandler
     private void sendChunksSourceInfo(String id,
                                       String md5,
                                       int specs,
-                                      int total)
-            throws
-            Exception {
+                                      int total) {
         ChunksSourceInfo chunksSourceInfo = new ChunksSourceInfo(md5,
                                                                  specs,
                                                                  total);
@@ -767,8 +699,7 @@ public class ChunkFileMergeHandler
         Map<Integer, Integer> chunkFileIndices = new HashMap<>();
 
         chunkFileService.chunkFileIndicesList(md5,
-                                              specs,
-                                              false)
+                                              specs)
                         .forEach(x -> chunkFileIndices
                                 .put(x.getIndex(),
                                      chunkFileIndices
@@ -780,11 +711,11 @@ public class ChunkFileMergeHandler
         chunksSourceInfo.setActivities(getActivityInfo(total,
                                                        chunkFileIndices));
 
-        Map<String, Object> data = new LinkedHashMap<>();
+        Map<String, Object> data = new HashMap<>();
         data.put("chunksSourceInfo",
                  chunksSourceInfo);
-        sendUpdateData(id,
-                       data);
+        sendData(id,
+                 data);
     }
 
     /**
@@ -807,19 +738,16 @@ public class ChunkFileMergeHandler
                 int lastTaskCurrentChunkIndex = -2;
 
                 while (chunkFileMergeTaskService.isUploading(md5,
-                                                             specs,
-                                                             false)) {
+                                                             specs)) {
                     Date _lastChunkFileUpload
                             = chunkFileService.lastUploadedChunkFileCreateTime(md5,
-                                                                               specs,
-                                                                               false);
+                                                                               specs);
 
                     if (Objects.equals(lastChunkFileUpload,
                                        _lastChunkFileUpload)) {
                         int _lastTaskCurrentChunkIndex
                                 = chunkFileMergeTaskService.lastCurrentIndex(md5,
-                                                                             specs,
-                                                                             false);
+                                                                             specs);
 
                         if (lastTaskCurrentChunkIndex == _lastTaskCurrentChunkIndex) {
                             TaskExtension.delay(500);
@@ -837,7 +765,10 @@ public class ChunkFileMergeHandler
                     TaskExtension.delay(500);
                 }
             } catch (Exception ex) {
-                logger.error("发送分片来源信息任务发生异常",
+                logger.error(String.format("%s：发送分片来源信息任务发生异常, 任务[ID: %s]，%s",
+                                           getName(),
+                                           id,
+                                           ex.getMessage()),
                              ex);
             }
         });
@@ -878,13 +809,33 @@ public class ChunkFileMergeHandler
     }
 
     /**
-     * 发送更新数据
+     * 发送任务信息
+     *
+     * @param task      设备信息
+     * @param allFields 全部字段
+     * @param fields    指定字段
+     */
+    private void sendTaskInfo(CommonChunkFileMergeTask task,
+                              boolean allFields,
+                              String... fields) {
+        if (!config.getHubConfig()
+                   .isEnable())
+            return;
+
+        sendData(task.getId(),
+                 ChunkFileClearHandler.getSendData(task,
+                                                   allFields,
+                                                   fields));
+    }
+
+    /**
+     * 发送数据
      *
      * @param id   任务Id
-     * @param data 更新的数据
+     * @param data 数据键值对
      */
-    private void sendUpdateData(String id,
-                                Map<String, Object> data) {
+    private void sendData(String id,
+                          Map<String, Object> data) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id",
                        id);

@@ -2,21 +2,19 @@ package top.lctr.naive.file.system.business.service.Implementation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import project.extension.mybatis.edge.INaiveSql;
-import project.extension.mybatis.edge.core.repository.IBaseRepository_Key;
-import project.extension.mybatis.edge.extention.RepositoryExtension;
+import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
+import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.business.service.Interface.IChunkFileMergeTaskService;
 import top.lctr.naive.file.system.business.service.Interface.IFileService;
+import top.lctr.naive.file.system.config.ServiceConfig;
 import top.lctr.naive.file.system.dto.CFMTState;
-import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
-import top.lctr.naive.file.system.entityFields.Base_Fields;
+import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
 import top.lctr.naive.file.system.entityFields.CFMT_Fields;
 
 import java.io.File;
@@ -36,16 +34,19 @@ public class ChunkFileMergeTaskService
         implements IChunkFileMergeTaskService {
     public ChunkFileMergeTaskService(IEntityExtension entityExtension,
                                      INaiveSql naiveSql,
-                                     IFileService fileService)
-            throws
-            Throwable {
+                                     IFileService fileService,
+                                     ServiceConfig serviceConfig) {
         this.entityExtension = entityExtension;
+        this.orm = naiveSql;
         this.repository_Key = naiveSql.getRepository_Key(CommonChunkFileMergeTask.class,
                                                          String.class);
         this.fileService = fileService;
+        this.serviceConfig = serviceConfig;
     }
 
     private final IEntityExtension entityExtension;
+
+    private final INaiveSql orm;
 
     private final IBaseRepository_Key<CommonChunkFileMergeTask, String> repository_Key;
 
@@ -56,11 +57,7 @@ public class ChunkFileMergeTaskService
      */
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * 服务器标识
-     */
-    @Value("${file.serverKey}")
-    private String serverKey;
+    private final ServiceConfig serviceConfig;
 
     @Override
     public CommonChunkFileMergeTask create(String md5,
@@ -69,13 +66,12 @@ public class ChunkFileMergeTaskService
                                            String name,
                                            int specs,
                                            int total,
-                                           String state,
-                                           boolean withTransactional)
+                                           String state)
             throws
             BusinessException {
         try {
             CommonChunkFileMergeTask data = new CommonChunkFileMergeTask();
-            data.setServerKey(serverKey);
+            data.setServerKey(serviceConfig.getKey());
             data.setMd5(md5);
             data.setContentType(contentType);
             data.setExtension(extension);
@@ -94,21 +90,13 @@ public class ChunkFileMergeTaskService
     }
 
     @Override
-    public void update(CommonChunkFileMergeTask task,
-                       boolean withTransactional)
-            throws
-            Exception {
-        repository_Key.withTransactional(withTransactional)
-                      .update(task);
+    public void update(CommonChunkFileMergeTask task) {
+        repository_Key.update(task);
     }
 
     @Override
-    public CommonChunkFileMergeTask get(String id,
-                                        boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public CommonChunkFileMergeTask get(String id) {
+        return repository_Key.select()
                              .where(x -> x.and(CFMT_Fields.id,
                                                FilterCompare.Eq,
                                                id))
@@ -116,45 +104,35 @@ public class ChunkFileMergeTaskService
     }
 
     @Override
-    public List<String> getUnfinishedIdList(boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public List<String> getUnfinishedIdList() {
+        return repository_Key.select()
                              .columns(CFMT_Fields.id)
                              .where(x -> x.and(CFMT_Fields.state,
                                                FilterCompare.NotEq,
                                                CFMTState.已完成)
                                           .and(CFMT_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .toList(String.class);
     }
 
     @Override
-    public List<String> getUnclearedIdList(boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public List<String> getUnclearedIdList() {
+        return repository_Key.select()
                              .columns(CFMT_Fields.id)
                              .where(x -> x.and(CFMT_Fields.state,
                                                FilterCompare.Eq,
                                                CFMTState.待清理)
                                           .and(CFMT_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .toList(String.class);
     }
 
     @Override
     public Boolean isUploading(String md5,
-                               Integer specs,
-                               boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                               Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CFMT_Fields.md5,
                                                FilterCompare.Eq,
                                                md5)
@@ -166,18 +144,14 @@ public class ChunkFileMergeTaskService
                                                CFMTState.上传中)
                                           .and(CFMT_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .any();
     }
 
     @Override
     public Integer lastCurrentIndex(String md5,
-                                    Integer specs,
-                                    boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                    Integer specs) {
+        return repository_Key.select()
                              .where(x -> x.and(CFMT_Fields.md5,
                                                FilterCompare.Eq,
                                                md5)
@@ -186,8 +160,8 @@ public class ChunkFileMergeTaskService
                                                specs)
                                           .and(CFMT_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
-                             .orderBy(x -> x.orderByDescending(Base_Fields.updateTime))
+                                               serviceConfig.getKey()))
+                             .orderBy(x -> x.orderByDescending(CFMT_Fields.updateTime))
                              .first(CFMT_Fields.currentChunkIndex,
                                     Integer.class);
     }
@@ -195,13 +169,9 @@ public class ChunkFileMergeTaskService
     @Override
     public Boolean isAlreadyExist(String md5,
                                   Integer specs,
-                                  Integer total,
-                                  boolean withTransactional)
-            throws
-            Exception {
+                                  Integer total) {
         List<java.util.Map<String, Object>> list
-                = repository_Key.withTransactional(withTransactional)
-                                .select()
+                = repository_Key.select()
                                 .where(x -> x.and(CFMT_Fields.md5,
                                                   FilterCompare.Eq,
                                                   md5)
@@ -219,7 +189,7 @@ public class ChunkFileMergeTaskService
                                                   CFMTState.已失效)
                                              .and(CFMT_Fields.serverKey,
                                                   FilterCompare.Eq,
-                                                  serverKey))
+                                                  serviceConfig.getKey()))
                                 .columns(CFMT_Fields.id,
                                          CFMT_Fields.path,
                                          CFMT_Fields.state)
@@ -230,12 +200,12 @@ public class ChunkFileMergeTaskService
 
         List<String> deleteIds = new ArrayList<>();
         for (java.util.Map<String, Object> map : list) {
-            String id = (String) RepositoryExtension.getMapValueByFieldName(map,
-                                                                            CFMT_Fields.id);
-            String path = String.valueOf(RepositoryExtension.getMapValueByFieldName(map,
-                                                                                    CFMT_Fields.path));
-            String state = (String) RepositoryExtension.getMapValueByFieldName(map,
-                                                                               CFMT_Fields.state);
+            String id = (String) orm.getMapValueByFieldName(map,
+                                                            CFMT_Fields.id);
+            String path = String.valueOf(orm.getMapValueByFieldName(map,
+                                                                    CFMT_Fields.path));
+            String state = (String) orm.getMapValueByFieldName(map,
+                                                               CFMT_Fields.state);
             if (!state.equals(CFMTState.待清理) && !state.equals(CFMTState.已完成))
                 continue;
 
@@ -262,12 +232,8 @@ public class ChunkFileMergeTaskService
     @Override
     public CommonChunkFileMergeTask getAlreadyTask(String md5,
                                                    Integer specs,
-                                                   Integer total,
-                                                   boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+                                                   Integer total) {
+        return repository_Key.select()
                              .where(x -> x.and(CFMT_Fields.md5,
                                                FilterCompare.Eq,
                                                md5)
@@ -285,17 +251,13 @@ public class ChunkFileMergeTaskService
                                                CFMTState.已失效)
                                           .and(CFMT_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .first();
     }
 
     @Override
-    public Boolean isExpire(String id,
-                            boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public Boolean isExpire(String id) {
+        return repository_Key.select()
                              .where(x -> x.and(CFMT_Fields.id,
                                                FilterCompare.Eq,
                                                id)

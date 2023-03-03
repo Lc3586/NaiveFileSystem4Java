@@ -9,7 +9,7 @@ import project.extension.tuple.Tuple2;
 import top.lctr.naive.file.system.config.FileRepairConfig;
 
 /**
- * 文件修复集线器处理类
+ * 文件信息修复模块集线器
  *
  * @author LCTR
  * @date 2022-12-08
@@ -18,7 +18,7 @@ import top.lctr.naive.file.system.config.FileRepairConfig;
 public class FileRepairHubHandler
         extends HubHandler {
     public FileRepairHubHandler(FileRepairConfig config) {
-        super("文件修复集线器处理类",
+        super("文件信息修复模块集线器",
               config.getHubConfig()
                     .getHandlerThreadPoolSize(),
               config.getHubConfig()

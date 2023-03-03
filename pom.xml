@@ -4,9 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>NaiveFileSystem4Java</name>
+    <description>
+        Java文件服务系统
+    </description>
     <groupId>top.lctr</groupId>
     <artifactId>naive-file-system</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -49,21 +53,15 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <maven.version>1.0.0-SNAPSHOT</maven.version>
         <maven.test.skip>true</maven.test.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <server.id>rdc-releases</server.id>
+        <project.extension.model.version>1.0.3-SNAPSHOT</project.extension.model.version>
+        <!--    请勿升级SpringBoot版本！    -->
+        <spring.boot.version>2.7.5</spring.boot.version>
+        <spring.framework.version>5.3.23</spring.framework.version>
+        <swagger.version>3.0.0</swagger.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-
-        </dependencies>
-    </dependencyManagement>
-
-    <modules>
-
-    </modules>
 
     <build>
         <plugins>
@@ -72,7 +70,10 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.1.1.RELEASE</version>
                 <configuration>
-                    <fork>true</fork> <!-- 如果没有该配置，devtools不会生效 -->
+                    <!--把本地的system的jar也包括进来-->
+                    <includeSystemScope>true</includeSystemScope>
+                    <!-- 如果没有该配置，devtools不会生效 -->
+                    <fork>true</fork>
                 </configuration>
                 <executions>
                     <execution>
@@ -125,8 +126,22 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.11.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <warName>${project.artifactId}</warName>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -222,50 +237,98 @@
             </plugin>
         </plugins>
         <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <excludes>
-                    <exclude>application-dev.yml</exclude>
-                    <exclude>application-publish.yml</exclude>
-                </excludes>
-            </resource>
+            <!--引入配置文件-->
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>application-${env}.yml</include>
+                    <include>application.yml</include>
+                    <include>application-${env}-${os}.yml</include>
+                    <include>logback.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/mybatis</directory>
+                <targetPath>mybatis</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
+            <!--引入国际化资源包-->
+            <resource>
+                <directory>src/main/resources/i18n</directory>
+                <targetPath>i18n</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
+            <!--引入元信息-->
+            <resource>
+                <directory>src/main/resources/META-INF</directory>
+                <targetPath>META-INF</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
+            <!--引入工具文件-->
+            <resource>
+                <directory>tools/ffmpeg</directory>
+                <targetPath>tools/ffmpeg</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.*</include>
                 </includes>
             </resource>
         </resources>
     </build>
 
     <profiles>
-        <!--        <profile>-->
-        <!--            <id>ossrh</id>-->
-        <!--            <build>-->
-        <!--                <plugins>-->
-        <!--                    <plugin>-->
-        <!--                        <groupId>org.apache.maven.plugins</groupId>-->
-        <!--                        <artifactId>maven-source-plugin</artifactId>-->
-        <!--                        <version>3.2.1</version>-->
-        <!--                        <executions>-->
-        <!--                            <execution>-->
-        <!--                                <phase>package</phase>-->
-        <!--                                <goals>-->
-        <!--                                    <goal>jar-no-fork</goal>-->
-        <!--                                </goals>-->
-        <!--                            </execution>-->
-        <!--                        </executions>-->
-        <!--                    </plugin>-->
-        <!--                </plugins>-->
-        <!--            </build>-->
-        <!--        </profile>-->
         <!-- 开发环境 -->
         <profile>
-            <id>dev</id>
+            <id>dev-win64</id>
             <properties>
                 <env>dev</env>
+                <os>win64</os>
+            </properties>
+        </profile>
+        <!-- 测试环境 -->
+        <profile>
+            <id>test-win64</id>
+            <properties>
+                <env>test</env>
+                <os>win64</os>
+            </properties>
+        </profile>
+        <!-- 打包环境 -->
+        <profile>
+            <id>prod-win32</id>
+            <properties>
+                <env>prod</env>
+                <os>win32</os>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-win64</id>
+            <properties>
+                <env>prod</env>
+                <os>win64</os>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-linux32</id>
+            <properties>
+                <env>prod</env>
+                <os>linux32</os>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-linux64</id>
+            <properties>
+                <env>prod</env>
+                <os>linux64</os>
             </properties>
         </profile>
         <!-- 发布环境 -->
@@ -286,15 +349,14 @@
     <dependencies>
         <dependency>
             <groupId>top.lctr</groupId>
-            <artifactId>project-extension-standard</artifactId>
-            <version>${maven.version}</version>
+            <artifactId>project-extension-mybatis-edge</artifactId>
+            <version>${project.extension.model.version}</version>
         </dependency>
 
-        <!-- servlet包 -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>top.lctr</groupId>
+            <artifactId>project-extension-document</artifactId>
+            <version>${project.extension.model.version}</version>
         </dependency>
 
         <!--    图片压缩 -->
@@ -304,59 +366,61 @@
             <version>0.4.18</version>
         </dependency>
 
-        <!-- SpringBoot -->
+        <!-- servlet包 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-dependencies</artifactId>
-            <version>2.7.5</version>
-            <type>pom</type>
-            <scope>import</scope>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>5.3.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-            <version>2.7.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>5.3.17</version>
-        </dependency>
-
+        <!-- SpringBoot Web应用 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.7.5</version>
+            <version>${spring.boot.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>2.7.5</version>
+            <version>${spring.boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-            <version>2.7.5</version>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring.boot.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <!--logback-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
 
         <!-- swagger3-->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
-            <version>3.0.0</version>
+            <version>${swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.14.0</version>
         </dependency>
 
-        <!-- 测试专用依赖 -->
+        <!-- 测试工具 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -368,6 +432,18 @@
             <artifactId>junit-platform-runner</artifactId>
             <version>1.9.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

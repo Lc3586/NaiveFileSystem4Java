@@ -9,7 +9,7 @@ import project.extension.tuple.Tuple2;
 import top.lctr.naive.file.system.config.FileRepairConfig;
 
 /**
- * Word文件自动转换Pdf文件集线器处理类
+ * Word文档转PDF文档模块集线器
  *
  * @author LCTR
  * @date 2022-12-08
@@ -18,7 +18,7 @@ import top.lctr.naive.file.system.config.FileRepairConfig;
 public class Word2PdfHubHandler
         extends HubHandler {
     public Word2PdfHubHandler(FileRepairConfig config) {
-        super("Word文件自动转换Pdf文件集线器处理类",
+        super("Word文档转PDF文档模块集线器",
               config.getHubConfig()
                     .getHandlerThreadPoolSize(),
               config.getHubConfig()

@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import project.extension.collections.CollectionsExtension;
-import project.extension.mybatis.edge.INaiveSql;
-import project.extension.mybatis.edge.core.provider.standard.ISelect;
-import project.extension.mybatis.edge.core.repository.IBaseRepository_Key;
+import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
+import project.extension.mybatis.edge.core.provider.standard.curd.ISelect;
+import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
+import project.extension.mybatis.edge.extention.datasearch.TreeDataSearchDTO;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
 import project.extension.mybatis.edge.model.OperationSymbol;
-import project.extension.standard.datasearch.DataSearchExtension;
-import project.extension.standard.datasearch.TreeDataSearchDTO;
 import project.extension.standard.datasort.DataSortDTO;
 import project.extension.standard.datasort.SortMethod;
 import project.extension.standard.datasort.TreeDragSortDTO;
@@ -23,7 +23,7 @@ import project.extension.standard.exception.BusinessException;
 import project.extension.string.StringExtension;
 import top.lctr.naive.file.system.business.service.Interface.IFileUploadConfigService;
 import top.lctr.naive.file.system.dto.fileUploadConfigDTO.*;
-import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
 import top.lctr.naive.file.system.entityFields.FUC_Fields;
 
 import java.util.*;
@@ -41,9 +41,7 @@ import java.util.stream.Collectors;
 public class FileUploadConfigService
         implements IFileUploadConfigService {
     public FileUploadConfigService(IEntityExtension entityExtension,
-                                   INaiveSql naiveSql)
-            throws
-            Throwable {
+                                   INaiveSql naiveSql) {
         this.entityExtension = entityExtension;
         this.repository_Key = naiveSql.getRepository_Key(CommonFileUploadConfig.class,
                                                          String.class);
@@ -81,9 +79,7 @@ public class FileUploadConfigService
      */
     private List<TreeList> getTreeList(TreeDataSearchDTO dataSearch,
                                        boolean deep,
-                                       List<String> treeIds)
-            throws
-            Exception {
+                                       List<String> treeIds) {
         if (dataSearch.getParentId() != null && !StringUtils.hasText(dataSearch.getParentId()))
             dataSearch.setParentId(null);
 
@@ -154,9 +150,7 @@ public class FileUploadConfigService
      * @return true: 存在循环引用
      */
     private boolean checkCircularReference(String id,
-                                           String referenceId)
-            throws
-            Exception {
+                                           String referenceId) {
         if (id.equals(referenceId))
             return true;
 
@@ -194,9 +188,7 @@ public class FileUploadConfigService
      *
      * @param config 配置
      */
-    private void getReferenceConfig(Config config)
-            throws
-            Exception {
+    private void getReferenceConfig(Config config) {
         String sql = String.format(
                 "WITH \"as_tree_cte\"(cte_level, \"ID\", \"ALLOWED_TYPES\", \"PROHIBITED_TYPES\", \"REFERENCE_ID\" , \"REFERENCE_TREE\")\n"
                         + "as\n"
@@ -286,8 +278,7 @@ public class FileUploadConfigService
         try {
             if (StringExtension.ignoreCaseEquals("default",
                                                  code))
-                code = repository_Key.withTransactional(withTransactional)
-                                     .select()
+                code = repository_Key.select()
                                      .where(x ->
                                                     x.and(FUC_Fields.enable,
                                                           FilterCompare.Eq,
@@ -301,8 +292,7 @@ public class FileUploadConfigService
 
             String finalCode = code;
 
-            Config config = repository_Key.withTransactional(withTransactional)
-                                          .select()
+            Config config = repository_Key.select()
                                           .where(x -> x.and(FUC_Fields.code,
                                                             FilterCompare.Eq,
                                                             finalCode))
@@ -463,8 +453,7 @@ public class FileUploadConfigService
             throws
             BusinessException {
         try {
-            repository_Key.withTransactional(true)
-                          .deleteByIds(ids);
+            repository_Key.deleteByIds(ids);
         } catch (Exception ex) {
             throw new BusinessException("删除数据失败",
                                         ex);
@@ -481,8 +470,7 @@ public class FileUploadConfigService
             if (data.getSpan() == 0 && (data.getMethod() != SortMethod.TOP || data.getMethod() != SortMethod.LOW))
                 return;
 
-            Map<String, Object> current = repository_Key.withTransactional(true)
-                                                        .select()
+            Map<String, Object> current = repository_Key.select()
                                                         .columns(FUC_Fields.id,
                                                                  FUC_Fields.parentId,
                                                                  FUC_Fields.sort)
@@ -581,8 +569,7 @@ public class FileUploadConfigService
                     .equals(data.getTargetId()))
                 return;
 
-            Map<String, Object> current = repository_Key.withTransactional(true)
-                                                        .select()
+            Map<String, Object> current = repository_Key.select()
                                                         .columns(FUC_Fields.id,
                                                                  FUC_Fields.parentId,
                                                                  FUC_Fields.sort)
@@ -738,13 +725,9 @@ public class FileUploadConfigService
     }
 
     @Override
-    public GetReferenceConfigFunUse_Types getConfigTypes(String code,
-                                                         boolean withTransactional)
-            throws
-            Exception {
+    public GetReferenceConfigFunUse_Types getConfigTypes(String code) {
         if (code.equals("default"))
-            code = repository_Key.withTransactional(withTransactional)
-                                 .select()
+            code = repository_Key.select()
                                  .where(x ->
                                                 x.and(FUC_Fields.enable,
                                                       FilterCompare.Eq,

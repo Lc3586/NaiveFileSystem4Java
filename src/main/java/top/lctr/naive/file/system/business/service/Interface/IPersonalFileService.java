@@ -1,10 +1,10 @@
 package top.lctr.naive.file.system.business.service.Interface;
 
-import project.extension.standard.datasearch.DataSearchDTO;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.dto.personalFileDTO.Edit;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
 
 import java.util.Collection;
 
@@ -28,47 +28,41 @@ public interface IPersonalFileService {
     /**
      * 详情数据（在事务下执行）
      *
-     * @param id                主键
-     * @param withTransactional 是否在事务下运行
+     * @param id 主键
      * @return 详情数据
      */
-    PersonalFile detail(String id,
-                        boolean withTransactional)
+    PersonalFile detail(String id)
             throws
             BusinessException;
 
     /**
      * 新增
      *
-     * @param fileId            文件信息主键
-     * @param configCode        上传配置
-     * @param name              文件名
-     * @param state             状态
-     * @param createBy          创建者
-     * @param withTransactional 是否在事务下运行
+     * @param fileId     文件信息主键
+     * @param configCode 上传配置
+     * @param name       文件名
+     * @param state      状态
+     * @param createBy   创建者
      * @return Id
      */
     String find(String fileId,
                 String configCode,
                 String name,
                 String state,
-                String createBy,
-                boolean withTransactional)
+                String createBy)
             throws
             BusinessException;
 
     /**
      * 启用
      *
-     * @param fileId            文件信息主键
-     * @param just4state        只更新此状态的数据
-     * @param state             更新为此状态
-     * @param withTransactional 是否在事务下运行
+     * @param fileId     文件信息主键
+     * @param just4state 只更新此状态的数据
+     * @param state      更新为此状态
      */
     void changeState(String fileId,
                      String just4state,
-                     String state,
-                     boolean withTransactional)
+                     String state)
             throws
             BusinessException;
 
@@ -100,41 +94,37 @@ public interface IPersonalFileService {
     /**
      * 新增
      *
-     * @param configCode        上传配置编码
-     * @param name              文件名
-     * @param extension         文件拓展名
-     * @param fileId            文件Id
-     * @param state             状态
-     * @param withTransactional 是否在事务下运行
+     * @param configCode 上传配置编码
+     * @param name       文件名
+     * @param extension  文件拓展名
+     * @param fileId     文件Id
+     * @param state      状态
      * @return Id
      */
     String create(String configCode,
                   String name,
                   String extension,
                   String fileId,
-                  String state,
-                  boolean withTransactional)
+                  String state)
             throws
             BusinessException;
 
     /**
      * 新增
      *
-     * @param id                指定Id
-     * @param configCode        上传配置编码
-     * @param name              文件名
-     * @param extension         文件拓展名
-     * @param fileId            文件Id
-     * @param state             状态
-     * @param withTransactional 是否在事务下运行
+     * @param id         指定Id
+     * @param configCode 上传配置编码
+     * @param name       文件名
+     * @param extension  文件拓展名
+     * @param fileId     文件Id
+     * @param state      状态
      */
     void create(String id,
                 String configCode,
                 String name,
                 String extension,
                 String fileId,
-                String state,
-                boolean withTransactional)
+                String state)
             throws
             BusinessException;
 

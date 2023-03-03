@@ -19,35 +19,37 @@ server:
 # 日志配置
 logging:
   level:
-    top.lctr: debug
+    top.lctr: warn
     org.springframework: warn
 
 # Spring配置
 spring:
   profiles:
-    active: @env@
+    active: @env@-@os@
   # 数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driverClassName: dm.jdbc.driver.DmDriver
     druid:
+      initial-size: 5
+      max-active: 20
+      minIdle: 2
       webStatFilter:
-        enabled: true
+        enabled: false
       statViewServlet:
-        enabled: true
+        enabled: false
         # 设置白名单，不填则允许所有访问
         allow:
         url-pattern: /druid/*
         # 控制台管理用户名和密码
-        login-username: ruoyi
+        login-username: admin
         login-password: 123456
       filter:
         stat:
-          enabled: true
+          enabled: false
           # 慢SQL记录
           log-slow-sql: true
           slow-sql-millis: 1000
-          merge-sql: true
+          merge-sql: false
         wall:
           config:
             multi-statement-allow: true
@@ -56,10 +58,13 @@ spring:
     mapper:
       # 接口反序列化参数时大小写不敏感
       accept-case-insensitive-properties: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   # 资源信息
   messages:
     # 国际化资源文件路径
-    basename: i18n/messages
+    basename: i18n/strings
 
 # Swagger配置
 swagger:
@@ -68,65 +73,56 @@ swagger:
   # 请求前缀
   pathMapping: /
 
-# 防止XSS攻击
-xss:
-  # 过滤开关
-  enabled: true
-  # 排除链接（多个用逗号分隔）
-  excludes: /system/notice
-  # 匹配链接
-  urlPatterns: /system/*,/monitor/*,/tool/*
+#服务配置
+service:
+  #服务标识
+  key: 00000000-0000-0000-0000-000000000001
+  #服务名称
+  name: Java文件服务系统
+  #版本号
+  version: 1.0.0
+  #启用swagger
+  enableSwagger: false
+  #站点资源文件根目录相对路径
+  wwwRootDirectory: wwwroot
 
 #项目拓展
 project:
   extension:
     mybatis:
-      # 需要扫描的存放实体类的包
-      scanEntitiesPackages: top.lctr.**.domain
+      # 默认的数据源
+      dataSource: master
       # mybatis配置文件路径
-      configLocation: mybatis/mybatis-config.xml
-      # 默认的数据库类型
-      dbType: JdbcDameng
+      configLocation: classpath:mybatis/mybatis-config.xml
+      # 需要扫描的存放实体类的包（包括TypeAliasesPackage）
+      scanEntitiesPackages: top.lctr.naive.file.system.entity.**
+      # 需要扫描的存放Mapper接口类的包（可选）
+#      scanMapperPackages: project.extension.mybatis.edge.mapper.**
+      # 需要扫描的存放Mapper配置类的包
+#      scanMapperXmlLocations: classpath:mybatis/mapper/**/*Mapper.xml
       # 默认的实体类表明/列名命名规则
-      nameConvertType: PascalCaseToUnderscoreWithUpper
-      # 默认的连接字符串
-      connectionString: ENC(G4fMAaqhzJFnRF8Zcdzyv4A3YikVTm4g+FOjKdnfd8eMJFqyz+/2ZcWZT6izBFlFIrXS2m0e1UAf364h2/upJbzAeCFAaPzav0ebN0/85aHcRELTqIpK/4Md6TgqysgHrJK3WWNC4PedmPbYtevkNJ10r1iAb/64rORV3wvjRMZ+gAenTCSJQOSAkvkbmrKFADnZesf2IoJBlxMs3wK0a3fKoybwQAOClaNgOCegbilFlFE3o2NP+A==)
-      # 多数据源配置（单数据库时无需配置此项）
+      nameConvertType: CamelCaseToPascalCase
+      # 多数据源配置
       multiDataSource:
         #主库
-        - name: master
-        #从库
-        - name: slave
-          dbType: JdbcSqlServer
-          nameConvertType: None
-          connectionString: ENC(Dg5XaaG9MyBD1Fj+y1hXkw+QNZB5NW0ictc8sx/ZggR0Fm6ny9g2vKFsMfSr66KUKgid1m3p5L8pcpMFcsEcQ/BqCyXsEce+JOrdqRxBRTE=)
-          enable: false
+        master:
+          enable: true
+          dbType: JdbcMySql8
+          nameConvertType: PascalCaseToUnderscoreWithLower
+          properties:
+            # 连接字符串
+            url: ENC(n6bQBumKHQd03g9JO6UiZaGwH711mXUI0+ud2b3yFdFCM8isW3XZAL6bYidbcNKU/tTjR7qmiHy9RYP9YiDEyOeUYB0NpVlolZAyfxNoyqEccCJwR0ZGfnT0LVp5aGwVYYKhGwey4/uTD7iLUFTL8Z84JrQhsVAUJfkPFBfnB6gSbZRRfNCtciUb+7WVXhTpTk3lGmBJ4FNcfIdCiHSnV7n/r20Pxk9VnL2Pwmx1P/0UnnDq8N+VyghqDI/ay99i)
+            # 用户名
+            username: ENC(LWfGadRuyaYT3ZIEFoEs/w==)
+            # 密码
+            password: ENC(Q88XTJSttazzBLg5bVN32Oyn0e5CagP/+MXtmSUYGxc=)
 
 #文件服务配置
 file:
-  #服务器标识
-  serverKey: 00000000-0000-0000-0000-000000000001
-  #站点资源文件根目录绝对路径
-  wwwRootDirectory: wwwroot
   #图片默认预览宽度
   previewWidth: 200
   #图片默认预览高度
   previewHeight: 200
-  #ffmpeg程序文件路径
-  #Windows
-  ffmpegFilePath: tools\ffmpeg\ffmpeg.exe
-  #Linux&OSX
-  #  ffmpegFilePath: /usr/bin/ffmpeg
-  #ffmpeg程序文件路径
-  #Windows
-  ffprobeFilePath: tools\ffmpeg\ffprobe.exe
-  #Linux&OSX
-  #  ffprobeFilePath: /usr/bin/ffprobe
-  #ffplay程序文件路径
-  #Windows
-  ffplayFilePath: tools\ffmpeg\ffplay.exe
-  #Linux&OSX
-  #  ffplayFilePath: /usr/bin/ffplay
   #大文件上传模块
   upload-large-file:
     #启用
@@ -177,6 +173,6 @@ file:
 
 jasypt:
   encryptor:
-    password: ${JAVA_JASYPT_PASSWORD}
+    password: ${JAVA_LCTR_TEST_JASYPT_PASSWORD}
     algorithm: PBEWithMD5AndDES
     iv-generator-classname: org.jasypt.iv.NoIvGenerator

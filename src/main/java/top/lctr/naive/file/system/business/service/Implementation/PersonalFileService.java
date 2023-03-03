@@ -10,13 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import project.extension.mybatis.edge.core.repository.IBaseRepository_Key;
-import project.extension.mybatis.edge.INaiveSql;
-import project.extension.mybatis.edge.extention.RepositoryExtension;
+import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
+import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
-import project.extension.standard.datasearch.DataSearchDTO;
-import project.extension.standard.datasearch.DataSearchExtension;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.business.service.Interface.IFileService;
@@ -27,7 +26,7 @@ import top.lctr.naive.file.system.dto.personalFileDTO.DownloadFunUse_Info;
 import top.lctr.naive.file.system.dto.personalFileDTO.Edit;
 import top.lctr.naive.file.system.dto.personalFileDTO.FunUse_Info;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
 import top.lctr.naive.file.system.entityFields.PFI_Fields;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,9 +46,7 @@ public class PersonalFileService
         implements IPersonalFileService {
     public PersonalFileService(IFileService fileService,
                                INaiveSql naiveSql,
-                               IEntityExtension entityExtension)
-            throws
-            Throwable {
+                               IEntityExtension entityExtension) {
         ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
         if (servletRequestAttributes != null) {
             this.request = servletRequestAttributes.getRequest();
@@ -59,6 +56,7 @@ public class PersonalFileService
             this.request = null;
             this.response = null;
         }
+        this.orm = naiveSql;
         this.repository_Key = naiveSql.getRepository_Key(CommonPersonalFile.class,
                                                          String.class);
         this.tableKeyAliasMap = new HashMap<>();
@@ -67,6 +65,8 @@ public class PersonalFileService
         this.fileService = fileService;
         this.entityExtension = entityExtension;
     }
+
+    private final INaiveSql orm;
 
     private final IBaseRepository_Key<CommonPersonalFile, String> repository_Key;
 
@@ -118,8 +118,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "已删除.jpg")
-                                           .toString(),
+                                                   "已删除.jpg")
+                                              .toString(),
                                          "image/jpg");
                 return true;
             case PersonalFileState.不可用:
@@ -128,8 +128,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "不可用.jpg")
-                                           .toString(),
+                                                   "不可用.jpg")
+                                              .toString(),
                                          "image/jpg");
                 return true;
         }
@@ -215,13 +215,11 @@ public class PersonalFileService
     }
 
     @Override
-    public PersonalFile detail(String id,
-                               boolean withTransactional)
+    public PersonalFile detail(String id)
             throws
             BusinessException {
         try {
-            PersonalFile data = repository_Key.withTransactional(withTransactional)
-                                              .select()
+            PersonalFile data = repository_Key.select()
                                               .withSql(
                                                       "SELECT a.*, b.file_type, b.content_type, b.md5, b.storage_type, b.bytes, b.size FROM common_personal_file AS a \n"
                                                               + "LEFT JOIN common_file AS b ON b.id = a.file_id ")
@@ -246,13 +244,11 @@ public class PersonalFileService
                        String configCode,
                        String name,
                        String state,
-                       String createBy,
-                       boolean withTransactional)
+                       String createBy)
             throws
             BusinessException {
         try {
-            return repository_Key.withTransactional(withTransactional)
-                                 .select()
+            return repository_Key.select()
                                  .where(x ->
                                                 x.and(PFI_Fields.fileId,
                                                       FilterCompare.Eq,
@@ -280,13 +276,11 @@ public class PersonalFileService
     @Override
     public void changeState(String fileId,
                             String just4state,
-                            String state,
-                            boolean withTransactional)
+                            String state)
             throws
             BusinessException {
         try {
-            repository_Key.withTransactional(withTransactional)
-                          .updateDiy()
+            repository_Key.updateDiy()
                           .set(PFI_Fields.state,
                                state)
                           .set(PFI_Fields.updateTime,
@@ -350,8 +344,7 @@ public class PersonalFileService
                          String name,
                          String extension,
                          String fileId,
-                         String state,
-                         boolean withTransactional)
+                         String state)
             throws
             BusinessException {
         try {
@@ -361,8 +354,7 @@ public class PersonalFileService
             data.setExtension(extension);
             data.setFileId(fileId);
             data.setState(state);
-            repository_Key.withTransactional(withTransactional)
-                          .insert(entityExtension.initialization(data));
+            repository_Key.insert(entityExtension.initialization(data));
             return data.getId();
         } catch (Exception ex) {
             throw new BusinessException("新增个人文件信息失败",
@@ -376,8 +368,7 @@ public class PersonalFileService
                        String name,
                        String extension,
                        String fileId,
-                       String state,
-                       boolean withTransactional)
+                       String state)
             throws
             BusinessException {
         try {
@@ -388,8 +379,7 @@ public class PersonalFileService
             data.setExtension(extension);
             data.setFileId(fileId);
             data.setState(state);
-            repository_Key.withTransactional(withTransactional)
-                          .insert(data);
+            repository_Key.insert(data);
         } catch (Exception ex) {
             throw new BusinessException("新增个人文件信息失败",
                                         ex);
@@ -462,8 +452,7 @@ public class PersonalFileService
             throws
             BusinessException {
         try {
-            repository_Key.withTransactional(true)
-                          .deleteByIds(ids);
+            repository_Key.deleteByIds(ids);
         } catch (Exception ex) {
             throw new BusinessException("删除数据失败",
                                         ex);
@@ -501,8 +490,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "不存在或已被删除.jpg")
-                                           .toString(),
+                                                   "不存在或已被删除.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 FileService.response(response,
@@ -516,8 +505,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "处理失败.jpg")
-                                           .toString(),
+                                                   "处理失败.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 FileService.response(response,
@@ -552,8 +541,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "不存在或已被删除.jpg")
-                                           .toString(),
+                                                   "不存在或已被删除.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 logger.error("预览失败",
@@ -569,8 +558,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "处理失败.jpg")
-                                           .toString(),
+                                                   "处理失败.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 logger.error("预览失败",
@@ -611,8 +600,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "不存在或已被删除.jpg")
-                                           .toString(),
+                                                   "不存在或已被删除.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 FileService.response(response,
@@ -626,8 +615,8 @@ public class PersonalFileService
                 FileService.responseFile(request,
                                          response,
                                          Paths.get(fileService.getFileStateDirectory(),
-                                                "处理失败.jpg")
-                                           .toString(),
+                                                   "处理失败.jpg")
+                                              .toString(),
                                          "image/jpg");
             } catch (Exception ex1) {
                 FileService.response(response,
@@ -705,11 +694,11 @@ public class PersonalFileService
             if (info == null)
                 throw new BusinessException("文件不存在或已被移除");
 
-            checkFileStateThrowExceptionWhenError((String) RepositoryExtension.getMapValueByFieldName(info,
-                                                                                                      PFI_Fields.state));
+            checkFileStateThrowExceptionWhenError((String) orm.getMapValueByFieldName(info,
+                                                                                      PFI_Fields.state));
 
-            return fileService.getFilePathById((String) RepositoryExtension.getMapValueByFieldName(info,
-                                                                                                   PFI_Fields.fileId));
+            return fileService.getFilePathById((String) orm.getMapValueByFieldName(info,
+                                                                                   PFI_Fields.fileId));
         } catch (Exception ex) {
             throw new BusinessException("获取文件路径失败",
                                         ex);
@@ -720,8 +709,7 @@ public class PersonalFileService
     @Transactional
     public PersonalFile word2Pdf(String id) {
         try {
-            FunUse_Info info = repository_Key.withTransactional(true)
-                                             .select()
+            FunUse_Info info = repository_Key.select()
                                              .where(x -> x.and(PFI_Fields.id,
                                                                FilterCompare.Eq,
                                                                id))
@@ -732,16 +720,14 @@ public class PersonalFileService
 
             checkFileStateThrowExceptionWhenError(info.getState());
 
-            FileInfo fileInfo = fileService.word2Pdf(info.getFileId(),
-                                                     true);
+            FileInfo fileInfo = fileService.word2PdfAndReturnFileInfo(info.getFileId());
 
             CommonPersonalFile personalFile = create(info.getName(),
                                                      fileInfo.getExtension(),
                                                      fileInfo.getId(),
                                                      info.getState());
 
-            return detail(personalFile.getId(),
-                          true);
+            return detail(personalFile.getId());
         } catch (NullResultException ex) {
             throw new BusinessException(ex.getMessage(),
                                         ex);

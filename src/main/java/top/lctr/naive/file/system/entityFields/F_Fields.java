@@ -5,10 +5,9 @@ package top.lctr.naive.file.system.entityFields;
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.CommonFile
+ * @see top.lctr.naive.file.system.entity.common.CommonFile
  */
-public final class F_Fields
-        extends Base_Fields {
+public final class F_Fields {
     /**
      * Id
      */
@@ -68,4 +67,9 @@ public final class F_Fields
      * 状态
      */
     public static final String state = "state";
+
+    /**
+     * 创建时间
+     */
+    public static final String createTime = "createTime";
 }

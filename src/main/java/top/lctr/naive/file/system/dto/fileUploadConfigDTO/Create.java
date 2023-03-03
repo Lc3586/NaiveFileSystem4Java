@@ -3,7 +3,7 @@ package top.lctr.naive.file.system.dto.fileUploadConfigDTO;
 import org.springframework.util.StringUtils;
 import project.extension.openapi.annotations.OpenApiMainTag;
 import project.extension.openapi.annotations.OpenApiMainTags;
-import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;

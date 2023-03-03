@@ -2,8 +2,8 @@ package top.lctr.naive.file.system.configures;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import project.extension.mybatis.edge.extention.EntityExtension;
 import project.extension.standard.authentication.IAuthenticationService;
-import project.extension.standard.entity.DefaultEntityExtension;
 import project.extension.standard.entity.IEntityExtension;
 
 /**
@@ -16,6 +16,6 @@ import project.extension.standard.entity.IEntityExtension;
 public class ProjectExtensionConfigure {
     @Bean
     public IEntityExtension configIEntityExtension(IAuthenticationService authenticationService) {
-        return new DefaultEntityExtension(authenticationService);
+        return new EntityExtension(authenticationService);
     }
 }

@@ -16,23 +16,23 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import project.extension.date.DateExtension;
+import project.extension.document.word.WordHelper;
 import project.extension.file.FileExtension;
 import project.extension.file.PathExtension;
 import project.extension.file.VideoHelper;
 import project.extension.file.VideoInfo;
-import project.extension.mybatis.edge.INaiveSql;
-import project.extension.mybatis.edge.core.repository.IBaseRepository_Key;
-import project.extension.mybatis.edge.extention.RepositoryExtension;
+import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
+import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
-import project.extension.office.word.WordHelper;
-import project.extension.standard.datasearch.DataSearchDTO;
-import project.extension.standard.datasearch.DataSearchExtension;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
 import project.extension.string.StringExtension;
 import project.extension.tuple.Tuple3;
 import top.lctr.naive.file.system.business.service.Interface.IFileService;
+import top.lctr.naive.file.system.config.ServiceConfig;
 import top.lctr.naive.file.system.dto.FileState;
 import top.lctr.naive.file.system.dto.FileType;
 import top.lctr.naive.file.system.dto.PersonalFileState;
@@ -41,8 +41,8 @@ import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.fileDTO.DeleteFunUse_File;
 import top.lctr.naive.file.system.dto.fileDTO.FileInfo;
 import top.lctr.naive.file.system.dto.fileDTO.LibraryInfo;
-import top.lctr.naive.file.system.entity.CommonFile;
-import top.lctr.naive.file.system.entity.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
 import top.lctr.naive.file.system.entityFields.F_Fields;
 import top.lctr.naive.file.system.entityFields.PFI_Fields;
 
@@ -73,10 +73,10 @@ import java.util.stream.Collectors;
 public class FileService
         implements IFileService {
     public FileService(IEntityExtension entityExtension,
-                       INaiveSql naiveSql)
-            throws
-            Throwable {
+                       INaiveSql naiveSql,
+                       ServiceConfig serviceConfig) {
         this.entityExtension = entityExtension;
+        this.serviceConfig = serviceConfig;
         ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
         if (servletRequestAttributes != null) {
             this.request = servletRequestAttributes.getRequest();
@@ -86,6 +86,7 @@ public class FileService
             this.request = null;
             this.response = null;
         }
+        this.orm = naiveSql;
         this.repository_Key = naiveSql.getRepository_Key(CommonFile.class,
                                                          String.class);
         this.repository_Key_PersonalFile = naiveSql.getRepository_Key(CommonPersonalFile.class,
@@ -96,6 +97,8 @@ public class FileService
     }
 
     private final IEntityExtension entityExtension;
+
+    private final INaiveSql orm;
 
     private final IBaseRepository_Key<CommonFile, String> repository_Key;
 
@@ -126,17 +129,7 @@ public class FileService
      */
     private final HttpServletResponse response;
 
-    /**
-     * 服务器标识
-     */
-    @Value("${file.serverKey}")
-    private String serverKey;
-
-    /**
-     * 站点资源文件根目录绝对路径
-     */
-    @Value("${file.wwwRootDirectory}")
-    private String wwwRootDirectory;
+    private final ServiceConfig serviceConfig;
 
     /**
      * 图片默认预览宽度
@@ -166,7 +159,7 @@ public class FileService
      * 文件状态图存储路径根目录绝对路径
      */
     private String fileStateDirectory() {
-        return Paths.get(wwwRootDirectory,
+        return Paths.get(serviceConfig.getWwwRootDirectory(),
                          "filestate")
                     .toAbsolutePath()
                     .toString();
@@ -176,7 +169,7 @@ public class FileService
      * 文件类型预览图存储路径根目录绝对路径
      */
     private String previewDirectory() {
-        return Paths.get(wwwRootDirectory,
+        return Paths.get(serviceConfig.getWwwRootDirectory(),
                          "filetypes")
                     .toAbsolutePath()
                     .toString();
@@ -626,15 +619,12 @@ public class FileService
     /**
      * Word转换为Pdf
      *
-     * @param id                Word文件主键
-     * @param withTransactional 事务
+     * @param id Word文件主键
      * @return Pdf文件主键
      */
-    private String word2PdfReturnId(String id,
-                                    boolean withTransactional) {
+    private String word2PdfReturnId(String id) {
         try {
-            FileInfo fileInfo = repository_Key.withTransactional(withTransactional)
-                                              .getByIdAndCheckNull(id,
+            FileInfo fileInfo = repository_Key.getByIdAndCheckNull(id,
                                                                    FileInfo.class,
                                                                    1,
                                                                    "文件不存在或已被删除");
@@ -696,8 +686,7 @@ public class FileService
                                      new File(savePath).length(),
                                      pdfPath,
                                      StorageType.相对路径,
-                                     fileInfo.getState(),
-                                     withTransactional);
+                                     fileInfo.getState());
 
             return file.getId();
         } catch (NullResultException ex) {
@@ -734,25 +723,20 @@ public class FileService
     }
 
     @Override
-    public List<String> getUnrepairedIdList(boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public List<String> getUnrepairedIdList() {
+        return repository_Key.select()
                              .columns(F_Fields.id)
                              .where(x -> x.and(F_Fields.state,
                                                FilterCompare.Eq,
                                                FileState.待修复)
                                           .and(F_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .toList(String.class);
     }
 
     @Override
-    public List<String> getUnConvert2PdfIdList()
-            throws
-            Exception {
+    public List<String> getUnConvert2PdfIdList() {
         return repository_Key.select()
                              .withSql("select * from \"COMMON_FILE\" where \"NAME\" in (select ii.\"NAME\" from (select i.\"NAME\", count(1) as \"C\" from \"COMMON_FILE\" as i group by i.\"NAME\") as ii where ii.\"C\"=1)")
                              .where(x -> x.and(y -> y.and(F_Fields.extension,
@@ -766,7 +750,7 @@ public class FileService
                                                StorageType.相对路径)
                                           .and(F_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .columns(F_Fields.id)
                              .toList(String.class);
     }
@@ -804,18 +788,14 @@ public class FileService
     }
 
     @Override
-    public FunUse_FileState getFileState(String md5,
-                                         boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public FunUse_FileState getFileState(String md5) {
+        return repository_Key.select()
                              .where(x -> x.and(F_Fields.md5,
                                                FilterCompare.Eq,
                                                md5)
                                           .and(F_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .orderBy(String.format("(CASE WHEN state='%s' THEN 1 ELSE 0 END) DESC, (CASE WHEN state='%s' THEN 1 ELSE 0 END) DESC, (CASE WHEN state='%s' THEN 1 ELSE 0 END) DESC",
                                                     FileState.可用,
                                                     FileState.处理中,
@@ -826,12 +806,8 @@ public class FileService
     @Override
     public void updateFileState(String md5,
                                 String fileState,
-                                String path,
-                                boolean withTransactional)
-            throws
-            Exception {
-        if (repository_Key.withTransactional(withTransactional)
-                          .updateDiy()
+                                String path) {
+        if (repository_Key.updateDiy()
                           .set(F_Fields.state,
                                fileState)
                           .set(F_Fields.path,
@@ -841,18 +817,14 @@ public class FileService
                                             md5)
                                        .and(F_Fields.serverKey,
                                             FilterCompare.Eq,
-                                            serverKey))
+                                            serviceConfig.getKey()))
                           .executeAffrows() < 0)
             throw new BusinessException("更新文件状态信息失败");
     }
 
     @Override
-    public CommonFile get(String id,
-                          boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public CommonFile get(String id) {
+        return repository_Key.select()
                              .where(x -> x.and(F_Fields.id,
                                                FilterCompare.Eq,
                                                id))
@@ -860,27 +832,20 @@ public class FileService
     }
 
     @Override
-    public void update(CommonFile file,
-                       boolean withTransactional)
-            throws
-            Exception {
-        repository_Key.withTransactional(withTransactional)
-                      .update(file);
+    public void update(CommonFile file) {
+        repository_Key.update(file);
     }
 
     @Override
-    public List<String> getRepairIdList(boolean withTransactional)
-            throws
-            Exception {
-        return repository_Key.withTransactional(withTransactional)
-                             .select()
+    public List<String> getRepairIdList() {
+        return repository_Key.select()
                              .columns(F_Fields.id)
                              .where(x -> x.and(F_Fields.state,
                                                FilterCompare.Eq,
                                                FileState.待修复)
                                           .and(F_Fields.serverKey,
                                                FilterCompare.Eq,
-                                               serverKey))
+                                               serviceConfig.getKey()))
                              .toList(String.class);
     }
 
@@ -893,13 +858,12 @@ public class FileService
             Long bytes,
             String relativePath,
             String storageType,
-            String state,
-            boolean withTransactional)
+            String state)
             throws
             BusinessException {
         try {
             CommonFile data = new CommonFile();
-            data.setServerKey(serverKey);
+            data.setServerKey(serviceConfig.getKey());
             data.setMd5(md5);
             data.setName(name);
             data.setExtension(extension);
@@ -911,8 +875,7 @@ public class FileService
             data.setPath(relativePath);
             data.setStorageType(storageType);
             data.setState(state);
-            repository_Key.withTransactional(withTransactional)
-                          .insert(entityExtension.initialization(data));
+            repository_Key.insert(entityExtension.initialization(data));
             return data;
         } catch (Exception ex) {
             throw new BusinessException("新增文件信息失败",
@@ -929,13 +892,11 @@ public class FileService
                        String relativePath,
                        String storageType,
                        String state,
-                       boolean doNotUpdateAvailableFile,
-                       boolean withTransactional)
+                       boolean doNotUpdateAvailableFile)
             throws
             BusinessException {
         try {
-            if (repository_Key.withTransactional(withTransactional)
-                              .updateDiy()
+            if (repository_Key.updateDiy()
                               .set(F_Fields.state,
                                    state)
                               .set(F_Fields.name,
@@ -961,7 +922,7 @@ public class FileService
                                         md5)
                                    .and(F_Fields.serverKey,
                                         FilterCompare.Eq,
-                                        serverKey);
+                                        serviceConfig.getKey());
                                   if (doNotUpdateAvailableFile)
                                       x.and(F_Fields.state,
                                             FilterCompare.NotEq,
@@ -977,13 +938,11 @@ public class FileService
     }
 
     @Override
-    public void delete(Collection<String> ids,
-                       boolean withTransactional)
+    public void delete(Collection<String> ids)
             throws
             BusinessException {
         try {
-            List<DeleteFunUse_File> files = repository_Key.withTransactional(withTransactional)
-                                                          .select()
+            List<DeleteFunUse_File> files = repository_Key.select()
                                                           .where(x -> x.and(F_Fields.id,
                                                                             FilterCompare.InSet,
                                                                             ids))
@@ -1013,8 +972,7 @@ public class FileService
                                   .executeAffrows() < 0)
                     throw new BusinessException("更新文件信息失败");
 
-                if (repository_Key_PersonalFile.withTransactional(withTransactional)
-                                               .updateDiy()
+                if (repository_Key_PersonalFile.updateDiy()
                                                .set(PFI_Fields.state,
                                                     PersonalFileState.已删除)
                                                .where(x -> x.and(PFI_Fields.fileId,
@@ -1157,8 +1115,7 @@ public class FileService
             throws
             BusinessException {
         try {
-            FileInfo fileInfo = repository_Key.withTransactional(true)
-                                              .getByIdAndCheckNull(id,
+            FileInfo fileInfo = repository_Key.getByIdAndCheckNull(id,
                                                                    FileInfo.class,
                                                                    1,
                                                                    "文件不存在或已被删除");
@@ -1177,8 +1134,7 @@ public class FileService
                             || ".docx".equals(fileInfo.getExtension())) {
                         //word文件转pdf后再浏览
                         AtomicReference<FileInfo> pdfFileInfo = new AtomicReference<>();
-                        pdfFileInfo.set(word2Pdf(fileInfo.getId(),
-                                                 true));
+                        pdfFileInfo.set(word2PdfAndReturnFileInfo(fileInfo.getId()));
 
                         //可以浏览
                         responseFile(request,
@@ -1524,7 +1480,7 @@ public class FileService
 
     @Override
     public String getWWWRootDirectory() {
-        return wwwRootDirectory;
+        return serviceConfig.getWwwRootDirectory();
     }
 
     @Override
@@ -1545,11 +1501,11 @@ public class FileService
             if (info == null)
                 throw new BusinessException("文件不存在或已被移除");
 
-            checkFileStateThrowExceptionWhenError((String) RepositoryExtension.getMapValueByFieldName(info,
-                                                                                                      F_Fields.state));
+            checkFileStateThrowExceptionWhenError((String) orm.getMapValueByFieldName(info,
+                                                                                      F_Fields.state));
 
-            return getFilePath((String) RepositoryExtension.getMapValueByFieldName(info,
-                                                                                   F_Fields.path));
+            return getFilePath((String) orm.getMapValueByFieldName(info,
+                                                                   F_Fields.path));
         } catch (Exception ex) {
             throw new BusinessException("获取文件路径失败",
                                         ex);
@@ -1565,19 +1521,16 @@ public class FileService
     }
 
     @Override
-    public FileInfo word2Pdf(String id,
-                             boolean withTransactional)
+    public FileInfo word2PdfAndReturnFileInfo(String id)
             throws
             BusinessException {
-        return detail(word2PdfReturnId(id,
-                                       withTransactional));
+        return detail(word2PdfReturnId(id));
     }
 
     @Override
     public void word2Pdf(String id)
             throws
             BusinessException {
-        word2PdfReturnId(id,
-                         false);
+        word2PdfReturnId(id);
     }
 }

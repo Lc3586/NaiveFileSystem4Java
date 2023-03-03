@@ -3,9 +3,7 @@ package top.lctr.naive.file.system.business.handler;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import project.extension.task.ActionTimerTask;
 import project.extension.task.TaskQueueHandler;
 import top.lctr.naive.file.system.business.service.Interface.IFileService;
 import top.lctr.naive.file.system.config.Word2PdfConfig;
@@ -15,18 +13,18 @@ import java.util.Map;
 
 
 /**
- * Word文件自动转换Pdf文件处理类
+ * Word文档转PDF文档模块
  *
  * @author LCTR
  * @date 2022-12-08
  */
-@Component("Word2PdfHandler")
+@Component
 public class Word2PdfHandler
         extends TaskQueueHandler {
     public Word2PdfHandler(Word2PdfConfig config,
                            IFileService fileService,
                            Word2PdfHubHandler word2PdfHubHandler) {
-        super("Word文件自动转换Pdf文件处理类",
+        super("Word文档转PDF文档模块",
               config.getThreadPoolSize(),
               LoggerFactory.getLogger(Word2PdfHandler.class));
         this.config = config;
@@ -36,12 +34,6 @@ public class Word2PdfHandler
 
     private final Word2PdfConfig config;
 
-    /**
-     * 服务器标识
-     */
-    @Value("${file.serverKey}")
-    private String serverKey;
-
     private final IFileService fileService;
 
     private final Word2PdfHubHandler word2PdfHubHandler;
@@ -49,13 +41,16 @@ public class Word2PdfHandler
     /**
      * 启动
      */
-    @Override
     public void start() {
         if (!config.isEnable())
             return;
 
-        super.start();
+        super.start(true);
 
+        logger.info(String.format("%s：已启动",
+                                  getName()));
+
+        //开始定时检查待转换为pdf的word文档
         startCheck(null);
     }
 
@@ -74,8 +69,8 @@ public class Word2PdfHandler
         Map<String, Object> sendData = new HashMap<>();
         sendData.put("info",
                      "待转换");
-        sendUpdateData(fileId,
-                       sendData);
+        sendData(fileId,
+                 sendData);
 
         //追加至队列并处理
         super.addTask(fileId,
@@ -94,13 +89,15 @@ public class Word2PdfHandler
 
             super.handler();
         } catch (Exception ex) {
-            logger.warn("添加待转换为pdf的文件至队列失败",
-                        ex);
+            logger.error(String.format("%s：添加待转换为pdf的文件至队列失败，%s",
+                                       getName(),
+                                       ex.getMessage()),
+                         ex);
         }
 
         //添加定时任务定时检查待修复的文件
-        super.addScheduleTask(new ActionTimerTask<>(this::startCheck,
-                                                    null),
+        super.addScheduleTask(this::startCheck,
+                              null,
                               config.getCheckInterval() * 60 * 60 * 1000L);
     }
 
@@ -136,12 +133,15 @@ public class Word2PdfHandler
             sendData.put("info",
                          String.format("转换成功，耗时: %sms",
                                        watch.getTime()));
-            sendUpdateData(id,
-                           sendData);
+            sendData(id,
+                     sendData);
         } catch (Exception ex) {
             String error = "转换文件时异常";
 
-            logger.error(error,
+            logger.error(String.format("%s：%s，%s",
+                                       getName(),
+                                       error,
+                                       ex.getMessage()),
                          ex);
 
             //推送实时信息
@@ -151,19 +151,19 @@ public class Word2PdfHandler
                          ex.toString());
             sendData.put("error",
                          true);
-            sendUpdateData(id,
-                           sendData);
+            sendData(id,
+                     sendData);
         }
     }
 
     /**
-     * 发送更新数据
+     * 发送数据
      *
      * @param id   任务Id
-     * @param data 更新的数据
+     * @param data 数据键值对
      */
-    private void sendUpdateData(String id,
-                                Map<String, Object> data) {
+    private void sendData(String id,
+                          Map<String, Object> data) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id",
                        id);

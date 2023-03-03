@@ -1,0 +1,37 @@
+# 日志配置
+logging:
+  level:
+    top.lctr: debug
+    org.springframework: warn
+
+# Spring配置
+spring:
+  # 数据源配置
+  datasource:
+    druid:
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: admin
+        login-password: 123456
+
+#服务配置
+service:
+  #服务标识
+  key: 00000000-0000-0000-0000-00000000000X
+  #启用swagger
+  enableSwagger: true
+
+#文件服务配置
+file:
+  #ffmpeg程序文件路径
+  ffmpegFilePath: tools\ffmpeg\ffmpeg.exe
+  #ffmpeg程序文件路径
+  ffprobeFilePath: tools\ffmpeg\ffprobe.exe
+  #ffplay程序文件路径
+  ffplayFilePath: tools\ffmpeg\ffplay.exe

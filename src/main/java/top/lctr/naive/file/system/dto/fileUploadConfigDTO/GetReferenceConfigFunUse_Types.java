@@ -3,7 +3,7 @@ package top.lctr.naive.file.system.dto.fileUploadConfigDTO;
 import org.springframework.util.StringUtils;
 import project.extension.mybatis.edge.annotations.EntityMapping;
 import project.extension.mybatis.edge.annotations.IgnoreEntityMapping;
-import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;

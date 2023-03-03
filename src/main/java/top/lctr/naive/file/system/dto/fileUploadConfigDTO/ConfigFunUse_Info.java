@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.dto.fileUploadConfigDTO;
 
 import project.extension.mybatis.edge.annotations.EntityMapping;
-import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
 
 /**
  *

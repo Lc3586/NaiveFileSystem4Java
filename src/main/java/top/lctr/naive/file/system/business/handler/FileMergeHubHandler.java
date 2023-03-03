@@ -9,7 +9,7 @@ import project.extension.tuple.Tuple2;
 import top.lctr.naive.file.system.config.UploadLargeFileConfig;
 
 /**
- * 分片文件合并集线器处理类
+ * 分片文件合并模块集线器
  *
  * @author LCTR
  * @date 2022-12-08
@@ -18,7 +18,7 @@ import top.lctr.naive.file.system.config.UploadLargeFileConfig;
 public class FileMergeHubHandler
         extends HubHandler {
     public FileMergeHubHandler(UploadLargeFileConfig config) {
-        super("分片文件合并集线器处理类",
+        super("分片文件合并模块集线器",
               config.getHubConfig()
                     .getHandlerThreadPoolSize(),
               config.getHubConfig()

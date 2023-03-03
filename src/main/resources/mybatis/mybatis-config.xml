@@ -16,4 +16,9 @@
         <!-- 使用驼峰命名法转换字段 -->
         <!-- <setting name="mapUnderscoreToCamelCase" value="true"/> -->
     </settings>
+
+    <!-- 添加实体映射 -->
+    <typeAliases>
+        <package name="top.lctr.naive.file.system.entity"/>
+    </typeAliases>
 </configuration>

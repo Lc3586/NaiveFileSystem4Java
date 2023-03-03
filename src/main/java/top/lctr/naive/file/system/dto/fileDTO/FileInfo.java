@@ -2,7 +2,7 @@ package top.lctr.naive.file.system.dto.fileDTO;
 
 import project.extension.openapi.annotations.OpenApiMainTag;
 import project.extension.openapi.annotations.OpenApiMainTags;
-import top.lctr.naive.file.system.entity.CommonFile;
+import top.lctr.naive.file.system.entity.common.CommonFile;
 
 /**
  * 文件信息业务模型

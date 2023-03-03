@@ -1,12 +1,12 @@
 package top.lctr.naive.file.system.business.service.Interface;
 
 import project.extension.file.VideoInfo;
-import project.extension.standard.datasearch.DataSearchDTO;
+import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.fileDTO.FileInfo;
 import top.lctr.naive.file.system.dto.fileDTO.LibraryInfo;
-import top.lctr.naive.file.system.entity.CommonFile;
+import top.lctr.naive.file.system.entity.common.CommonFile;
 
 import java.util.Collection;
 
@@ -30,21 +30,16 @@ public interface IFileService {
     /**
      * 获取待修复的文件Id集合
      *
-     * @param withTransactional 是否在事务下运行
      * @return 主键集合
      */
-    java.util.List<String> getUnrepairedIdList(boolean withTransactional)
-            throws
-            Exception;
+    java.util.List<String> getUnrepairedIdList();
 
     /**
      * 获取未转换为Pdf文件的文件主键集合
      *
      * @return 文件主键集合
      */
-    java.util.List<String> getUnConvert2PdfIdList()
-            throws
-            Exception;
+    java.util.List<String> getUnConvert2PdfIdList();
 
     /**
      * 详情数据
@@ -68,75 +63,55 @@ public interface IFileService {
     /**
      * 获取文件状态信息
      *
-     * @param md5               文件MD5校验值
-     * @param withTransactional 是否在事务下运行
+     * @param md5 文件MD5校验值
      * @return 文件状态信息
      */
-    FunUse_FileState getFileState(String md5,
-                                  boolean withTransactional)
-            throws
-            Exception;
+    FunUse_FileState getFileState(String md5);
 
     /**
      * 批量更新文件状态信息
      *
-     * @param md5               文件MD5校验值
-     * @param fileState         文件状态
-     * @param path              文件路径
-     * @param withTransactional 是否在事务下运行
+     * @param md5       文件MD5校验值
+     * @param fileState 文件状态
+     * @param path      文件路径
      */
     void updateFileState(String md5,
                          String fileState,
-                         String path,
-                         boolean withTransactional)
-            throws
-            Exception;
+                         String path);
 
     /**
      * 获取待修复的文件信息Id集合
      *
-     * @param withTransactional 是否在事务下运行
      * @return 文件信息Id集合
      */
-    java.util.List<String> getRepairIdList(boolean withTransactional)
-            throws
-            Exception;
+    java.util.List<String> getRepairIdList();
 
     /**
      * 获取
      *
-     * @param id                主键
-     * @param withTransactional 是否在事务下运行
+     * @param id 主键
      * @return 文件状态信息
      */
-    CommonFile get(String id,
-                   boolean withTransactional)
-            throws
-            Exception;
+    CommonFile get(String id);
 
     /**
      * 更新
      *
-     * @param file              文件信息
-     * @param withTransactional 是否在事务下运行
+     * @param file 文件信息
      */
-    void update(CommonFile file,
-                boolean withTransactional)
-            throws
-            Exception;
+    void update(CommonFile file);
 
     /**
      * 新增
      *
-     * @param md5               文件MD5值
-     * @param name              名称
-     * @param extension         文件扩展名
-     * @param contentType       内容类型
-     * @param bytes             字节数
-     * @param relativePath      文件相对路径
-     * @param storageType       存储类型
-     * @param state             状态
-     * @param withTransactional 是否在事务下运行
+     * @param md5          文件MD5值
+     * @param name         名称
+     * @param extension    文件扩展名
+     * @param contentType  内容类型
+     * @param bytes        字节数
+     * @param relativePath 文件相对路径
+     * @param storageType  存储类型
+     * @param state        状态
      */
     CommonFile create(
             String md5,
@@ -146,23 +121,21 @@ public interface IFileService {
             Long bytes,
             String relativePath,
             String storageType,
-            String state,
-            boolean withTransactional)
+            String state)
             throws
             BusinessException;
 
     /**
      * 批量更新文件状态信息
      *
-     * @param md5               文件MD5校验值
-     * @param name              名称
-     * @param extension         文件扩展名
-     * @param contentType       内容类型
-     * @param bytes             字节数
-     * @param relativePath      文件相对路径
-     * @param storageType       存储类型
-     * @param state             状态
-     * @param withTransactional 是否在事务下运行
+     * @param md5          文件MD5校验值
+     * @param name         名称
+     * @param extension    文件扩展名
+     * @param contentType  内容类型
+     * @param bytes        字节数
+     * @param relativePath 文件相对路径
+     * @param storageType  存储类型
+     * @param state        状态
      */
     void update(String md5,
                 String name,
@@ -172,19 +145,16 @@ public interface IFileService {
                 String relativePath,
                 String storageType,
                 String state,
-                boolean doNotUpdateAvailableFile,
-                boolean withTransactional)
+                boolean doNotUpdateAvailableFile)
             throws
             BusinessException;
 
     /**
      * 删除
      *
-     * @param ids               主键集合
-     * @param withTransactional 是否在事务下运行
+     * @param ids 主键集合
      */
-    void delete(Collection<String> ids,
-                boolean withTransactional)
+    void delete(Collection<String> ids)
             throws
             BusinessException;
 
@@ -358,12 +328,10 @@ public interface IFileService {
     /**
      * word文件转换为pdf文件
      *
-     * @param id                主键
-     * @param withTransactional 是否在事务下运行
+     * @param id 主键
      * @return 文件信息
      */
-    FileInfo word2Pdf(String id,
-                      boolean withTransactional)
+    FileInfo word2PdfAndReturnFileInfo(String id)
             throws
             BusinessException;
 
