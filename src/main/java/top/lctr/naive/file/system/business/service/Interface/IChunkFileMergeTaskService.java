@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.business.service.Interface;
 
 import project.extension.standard.exception.BusinessException;
-import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
 
 /**
  * 分片文件合并任务服务接口类

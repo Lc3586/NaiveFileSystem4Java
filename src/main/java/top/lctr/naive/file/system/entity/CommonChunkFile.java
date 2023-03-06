@@ -1,4 +1,4 @@
-package top.lctr.naive.file.system.entity.common;
+package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
@@ -31,9 +31,9 @@ public class CommonChunkFile {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 分片文件Id
+     * 主键
      */
-    @OpenApiDescription("分片文件Id")
+    @OpenApiDescription("主键")
     @ColumnSetting(isPrimaryKey = true,
                    length = 36)
     @OpenApiSubTag({"List",
@@ -80,6 +80,7 @@ public class CommonChunkFile {
      * 分片索引
      */
     @OpenApiDescription("分片索引")
+    @ColumnSetting(isNullable = false)
     @OpenApiSubTag({"List",
                     "Detail"})
     private Integer index;
@@ -88,6 +89,7 @@ public class CommonChunkFile {
      * 分片规格
      */
     @OpenApiDescription("分片规格")
+    @ColumnSetting(isNullable = false)
     @OpenApiSubTag({"List",
                     "Detail"})
     private Integer specs;
@@ -104,6 +106,7 @@ public class CommonChunkFile {
      * 文件大小
      */
     @OpenApiDescription("文件大小")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String size;
@@ -112,16 +115,18 @@ public class CommonChunkFile {
      * 文件相对路径
      */
     @OpenApiDescription("文件相对路径")
+    @ColumnSetting(length = 2048)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String path;
 
     /**
-     * 状态（上传中、可用、已删除）
+     * 状态
      *
      * @see top.lctr.naive.file.system.dto.FileState
      */
     @OpenApiDescription("状态")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String state;
@@ -130,6 +135,7 @@ public class CommonChunkFile {
      * 创建者
      */
     @OpenApiDescription("创建者")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"Detail"})
     private String createBy;
 
@@ -147,6 +153,9 @@ public class CommonChunkFile {
         this.id = id;
     }
 
+    /**
+     * 主键
+     */
     public String getId() {
         return id;
     }
@@ -155,6 +164,9 @@ public class CommonChunkFile {
         this.serverKey = serverKey;
     }
 
+    /**
+     * 服务器标识
+     */
     public String getServerKey() {
         return serverKey;
     }
@@ -163,6 +175,9 @@ public class CommonChunkFile {
         this.taskKey = taskKey;
     }
 
+    /**
+     * 任务标识
+     */
     public String getTaskKey() {
         return taskKey;
     }
@@ -171,6 +186,9 @@ public class CommonChunkFile {
         this.fileMd5 = fileMd5;
     }
 
+    /**
+     * 文件MD5校验值
+     */
     public String getFileMd5() {
         return fileMd5;
     }
@@ -179,6 +197,9 @@ public class CommonChunkFile {
         this.md5 = md5;
     }
 
+    /**
+     * 分片MD5校验值
+     */
     public String getMd5() {
         return md5;
     }
@@ -187,6 +208,9 @@ public class CommonChunkFile {
         this.index = index;
     }
 
+    /**
+     * 分片索引
+     */
     public Integer getIndex() {
         return index;
     }
@@ -195,6 +219,9 @@ public class CommonChunkFile {
         this.specs = specs;
     }
 
+    /**
+     * 分片规格
+     */
     public Integer getSpecs() {
         return specs;
     }
@@ -203,6 +230,9 @@ public class CommonChunkFile {
         this.bytes = bytes;
     }
 
+    /**
+     * 字节数
+     */
     public Long getBytes() {
         return bytes;
     }
@@ -211,6 +241,9 @@ public class CommonChunkFile {
         this.size = size;
     }
 
+    /**
+     * 文件大小
+     */
     public String getSize() {
         return size;
     }
@@ -219,6 +252,9 @@ public class CommonChunkFile {
         this.path = path;
     }
 
+    /**
+     * 文件相对路径
+     */
     public String getPath() {
         return path;
     }
@@ -227,6 +263,11 @@ public class CommonChunkFile {
         this.state = state;
     }
 
+    /**
+     * 状态
+     *
+     * @see top.lctr.naive.file.system.dto.FileState
+     */
     public String getState() {
         return state;
     }

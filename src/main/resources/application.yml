@@ -19,7 +19,7 @@ server:
 # 日志配置
 logging:
   level:
-    top.lctr: warn
+    top.lctr.naive.file.system: warn
     org.springframework: warn
 
 # Spring配置
@@ -66,13 +66,6 @@ spring:
     # 国际化资源文件路径
     basename: i18n/strings
 
-# Swagger配置
-swagger:
-  # 是否开启swagger
-  enabled: true
-  # 请求前缀
-  pathMapping: /
-
 #服务配置
 service:
   #服务标识
@@ -107,11 +100,11 @@ project:
         #主库
         master:
           enable: true
-          dbType: JdbcMySql8
+          dbType: JdbcMariaDB10
           nameConvertType: PascalCaseToUnderscoreWithLower
           properties:
             # 连接字符串
-            url: ENC(n6bQBumKHQd03g9JO6UiZaGwH711mXUI0+ud2b3yFdFCM8isW3XZAL6bYidbcNKU/tTjR7qmiHy9RYP9YiDEyOeUYB0NpVlolZAyfxNoyqEccCJwR0ZGfnT0LVp5aGwVYYKhGwey4/uTD7iLUFTL8Z84JrQhsVAUJfkPFBfnB6gSbZRRfNCtciUb+7WVXhTpTk3lGmBJ4FNcfIdCiHSnV7n/r20Pxk9VnL2Pwmx1P/0UnnDq8N+VyghqDI/ay99i)
+            url: ENC(SSpORgVScIribVtil+Lmmcdd4bU7/X9kcI1/N48uo0V/slXQ9lBWfy6PxET0D0iDf7duz9UzIcB4SltcbYD6tehPCMpMwxBNFwgzAiD/EjIBryYib60rCUoP3qiPF1N9EhpjGjn/yXkzwAVdvAyPwmkOseNYAsL7XfLrycE+waGWyOg2WL3Sr2wmipJ0v9DezypCE2+j3rphrOoNiAfNa7EsZKJ9Fb4YgxeXSYFwMQlZKuI+OFcccb2Ug/QjIGFV)
             # 用户名
             username: ENC(LWfGadRuyaYT3ZIEFoEs/w==)
             # 密码

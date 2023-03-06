@@ -1,11 +1,13 @@
 package top.lctr.naive.file.system.entityFields;
 
+import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
+
 /**
  * 文件上传配置对象实体字段
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.common.CommonFileUploadConfig
+ * @see CommonFileUploadConfig
  */
 public final class FUC_Fields {
     /**

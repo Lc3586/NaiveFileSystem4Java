@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.dto.fileUploadConfigDTO;
 
 import project.extension.openapi.annotations.OpenApiMainTag;
-import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
 
 /**
  * 文件上传配置业务模型

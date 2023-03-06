@@ -4,7 +4,7 @@ import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.dto.personalFileDTO.Edit;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
 
 import java.util.Collection;
 

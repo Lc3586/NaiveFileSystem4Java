@@ -25,6 +25,7 @@ import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
 import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
 import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
 import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
+import project.extension.mybatis.edge.model.DbType;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
 import project.extension.standard.entity.IEntityExtension;
@@ -41,8 +42,8 @@ import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.fileDTO.DeleteFunUse_File;
 import top.lctr.naive.file.system.dto.fileDTO.FileInfo;
 import top.lctr.naive.file.system.dto.fileDTO.LibraryInfo;
-import top.lctr.naive.file.system.entity.common.CommonFile;
-import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.CommonFile;
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
 import top.lctr.naive.file.system.entityFields.F_Fields;
 import top.lctr.naive.file.system.entityFields.PFI_Fields;
 
@@ -738,7 +739,30 @@ public class FileService
     @Override
     public List<String> getUnConvert2PdfIdList() {
         return repository_Key.select()
-                             .withSql("select * from \"COMMON_FILE\" where \"NAME\" in (select ii.\"NAME\" from (select i.\"NAME\", count(1) as \"C\" from \"COMMON_FILE\" as i group by i.\"NAME\") as ii where ii.\"C\"=1)")
+                             .withSql(
+                                     "SELECT * FROM `common_file` \r\n"
+                                             + "WHERE `name` IN (SELECT ii.`name` FROM (SELECT i.`name`, count(1) AS `C` FROM `common_file` AS i GROUP BY i.`name`) AS ii WHERE ii.`C`=1) ",
+                                     DbType.JdbcMySQL8,
+                                     DbType.JdbcMariaDB10)
+                             .withSql(
+                                     "SELECT * FROM [CommonFile] \r\n"
+                                             + "WHERE [Name] IN (SELECT ii.[Name] FROM (SELECT i.[Name], count(1) AS [C] FROM [CommonFile] AS i GROUP BY i.[Name]) AS ii WHERE ii.[C]=1) ",
+                                     DbType.JdbcSqlServer,
+                                     DbType.JdbcSqlServer_2012_plus)
+                             .withSql(
+                                     "SELECT * FROM \"COMMON_FILE\" \r\n"
+                                             + "WHERE \"NAME\" IN (SELECT ii.\"NAME\" FROM (SELECT i.\"NAME\", count(1) AS \"C\" FROM \"COMMON_FILE\" AS i GROUP BY i.\"NAME\") AS ii WHERE ii.\"C\"=1) ",
+                                     DbType.JdbcDameng6,
+                                     DbType.JdbcDameng7,
+                                     DbType.JdbcDameng8,
+                                     DbType.JdbcOracle12c,
+                                     DbType.JdbcOracle18c,
+                                     DbType.JdbcOracle19c,
+                                     DbType.JdbcOracle21c)
+                             .withSql(
+                                     "SELECT * FROM \"CommonFile\" \r\n"
+                                             + "WHERE \"Name\" IN (SELECT ii.\"Name\" FROM (SELECT i.\"Name\", count(1) AS \"C\" FROM \"CommonFile\" AS i GROUP BY i.\"Name\") AS ii WHERE ii.\"C\"=1) ",
+                                     DbType.JdbcPostgreSQL15)
                              .where(x -> x.and(y -> y.and(F_Fields.extension,
                                                           FilterCompare.EqIgnoreCase,
                                                           ".doc")
@@ -1418,8 +1442,30 @@ public class FileService
             BusinessException {
         try {
             return repository_Key.select()
-                                 .withSql(String.format("SELECT file_type as FileType, COUNT(1), SUM(bytes) FROM common_file GROUP BY file_type HAVING state = '%s'",
-                                                        FileState.可用))
+                                 .withSql(
+                                         String.format("SELECT `file_type`, COUNT(1), SUM(`bytes`) FROM `common_file` GROUP BY `file_type` HAVING `state` = '%s'",
+                                                       FileState.可用),
+                                         DbType.JdbcMySQL8,
+                                         DbType.JdbcMariaDB10)
+                                 .withSql(
+                                         String.format("SELECT [FileType], COUNT(1), SUM([bytes]) FROM [CommonFile] GROUP BY [FileType] HAVING [State] = '%s'",
+                                                       FileState.可用),
+                                         DbType.JdbcSqlServer,
+                                         DbType.JdbcSqlServer_2012_plus)
+                                 .withSql(
+                                         String.format("SELECT \"FILE_TYPE\", COUNT(1), SUM(\"BYTES\") FROM \"COMMON_FILE\" GROUP BY \"FILE_TYPE\" HAVING \"STATE\" = '%s'",
+                                                       FileState.可用),
+                                         DbType.JdbcDameng6,
+                                         DbType.JdbcDameng7,
+                                         DbType.JdbcDameng8,
+                                         DbType.JdbcOracle12c,
+                                         DbType.JdbcOracle18c,
+                                         DbType.JdbcOracle19c,
+                                         DbType.JdbcOracle21c)
+                                 .withSql(
+                                         String.format("SELECT \"FileType\", COUNT(1), SUM(\"Bytes\") FROM \"CommonFile\" GROUP BY \"FileType\" HAVING \"State\" = '%s'",
+                                                       FileState.可用),
+                                         DbType.JdbcPostgreSQL15)
                                  .toList(LibraryInfo.class);
 //            repository_Key.select()
 //                    .where(x -> x.and(CFFields.state, FilterCompare.Eq, FileState.可用))

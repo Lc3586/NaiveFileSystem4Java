@@ -1,8 +1,8 @@
 package top.lctr.naive.file.system.business.service.Interface;
 
 import project.extension.mybatis.edge.extention.datasearch.TreeDataSearchDTO;
-import project.extension.standard.datasort.DataSortDTO;
-import project.extension.standard.datasort.TreeDragSortDTO;
+import project.extension.standard.api.request.datasort.DataSortDTO;
+import project.extension.standard.api.request.datasort.TreeDragSortDTO;
 import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.dto.fileUploadConfigDTO.*;
 

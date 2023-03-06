@@ -14,7 +14,7 @@ import top.lctr.naive.file.system.business.service.Interface.IChunkFileMergeTask
 import top.lctr.naive.file.system.business.service.Interface.IFileService;
 import top.lctr.naive.file.system.config.ServiceConfig;
 import top.lctr.naive.file.system.dto.CFMTState;
-import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
 import top.lctr.naive.file.system.entityFields.CFMT_Fields;
 
 import java.io.File;

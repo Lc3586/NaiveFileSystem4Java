@@ -18,7 +18,7 @@ import top.lctr.naive.file.system.dto.FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_ForMerge;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_Indices;
-import top.lctr.naive.file.system.entity.common.CommonChunkFile;
+import top.lctr.naive.file.system.entity.CommonChunkFile;
 import top.lctr.naive.file.system.entityFields.CF_Fields;
 
 import java.nio.file.Paths;

@@ -3,7 +3,7 @@ package top.lctr.naive.file.system.dto.personalFileDTO;
 import org.springframework.util.StringUtils;
 import project.extension.openapi.annotations.OpenApiMainTag;
 import project.extension.openapi.annotations.OpenApiMainTags;
-import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;

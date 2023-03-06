@@ -6,7 +6,7 @@ import project.extension.standard.exception.BusinessException;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.fileDTO.FileInfo;
 import top.lctr.naive.file.system.dto.fileDTO.LibraryInfo;
-import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.CommonFile;
 
 import java.util.Collection;
 

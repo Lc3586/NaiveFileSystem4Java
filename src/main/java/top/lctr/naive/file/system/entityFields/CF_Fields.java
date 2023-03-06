@@ -1,11 +1,13 @@
 package top.lctr.naive.file.system.entityFields;
 
+import top.lctr.naive.file.system.entity.CommonChunkFile;
+
 /**
  * 分片文件信息实体字段
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.common.CommonChunkFile
+ * @see CommonChunkFile
  */
 public final class CF_Fields {
     /**

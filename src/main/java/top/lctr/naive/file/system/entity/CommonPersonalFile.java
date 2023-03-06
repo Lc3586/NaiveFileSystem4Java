@@ -1,4 +1,4 @@
-package top.lctr.naive.file.system.entity.common;
+package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
@@ -14,7 +14,7 @@ import project.extension.openapi.annotations.*;
 import java.util.Date;
 
 /**
- * 个人文件信息对象
+ * 个人文件信息
  *
  * @author LCTR
  * @date 2022-12-07
@@ -29,9 +29,9 @@ public class CommonPersonalFile {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 个人文件Id
+     * 主键
      */
-    @OpenApiDescription("个人文件Id")
+    @OpenApiDescription("主键")
     @OpenApiSubTag({"PersonalFileInfo",
                     "Edit"})
     @ColumnSetting(isPrimaryKey = true,
@@ -39,9 +39,9 @@ public class CommonPersonalFile {
     private String id;
 
     /**
-     * 文件Id
+     * 文件主键
      */
-    @OpenApiDescription("文件Id")
+    @OpenApiDescription("文件主键")
     @OpenApiSubTag({"PersonalFileInfo"})
     @ColumnSetting(length = 36)
     private String fileId;
@@ -58,6 +58,7 @@ public class CommonPersonalFile {
      * 文件重命名
      */
     @OpenApiDescription("文件重命名")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"PersonalFileInfo",
                     "Edit"})
     private String name;
@@ -67,7 +68,7 @@ public class CommonPersonalFile {
      */
     @OpenApiDescription("文件扩展名")
     @OpenApiSubTag({"PersonalFileInfo"})
-    @ColumnSetting(length = 256)
+    @ColumnSetting(length = 50)
     private String extension;
 
     /**
@@ -76,7 +77,7 @@ public class CommonPersonalFile {
     @OpenApiDescription("分类")
     @OpenApiSubTag({"PersonalFileInfo",
                     "Edit"})
-    @ColumnSetting(length = 256)
+    @ColumnSetting(length = 50)
     private String category;
 
     /**
@@ -103,7 +104,7 @@ public class CommonPersonalFile {
      */
     @OpenApiDescription("状态")
     @OpenApiSubTag({"PersonalFileInfo"})
-    @ColumnSetting(length = 10)
+    @ColumnSetting(length = 50)
     private String state;
 
     /**
@@ -115,13 +116,14 @@ public class CommonPersonalFile {
                     "Edit",
                     "Import",
                     "Export"})
-    @ColumnSetting(length = 500)
+    @ColumnSetting(length = -4)
     private String remark;
 
     /**
      * 创建者
      */
     @OpenApiDescription("创建者")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"PersonalFileInfo",
                     "Detail",
                     "Import",
@@ -165,6 +167,9 @@ public class CommonPersonalFile {
         this.id = id;
     }
 
+    /**
+     * 主键
+     */
     public String getId() {
         return id;
     }
@@ -173,6 +178,9 @@ public class CommonPersonalFile {
         this.fileId = fileId;
     }
 
+    /**
+     * 文件主键
+     */
     public String getFileId() {
         return fileId;
     }
@@ -181,6 +189,9 @@ public class CommonPersonalFile {
         this.configCode = configCode;
     }
 
+    /**
+     * 文件上传配置编码
+     */
     public String getConfigCode() {
         return configCode;
     }
@@ -189,6 +200,9 @@ public class CommonPersonalFile {
         this.name = name;
     }
 
+    /**
+     * 文件重命名
+     */
     public String getName() {
         return name;
     }
@@ -197,6 +211,9 @@ public class CommonPersonalFile {
         this.extension = extension;
     }
 
+    /**
+     * 文件扩展名
+     */
     public String getExtension() {
         return extension;
     }
@@ -205,6 +222,9 @@ public class CommonPersonalFile {
         this.category = category;
     }
 
+    /**
+     * 分类
+     */
     public String getCategory() {
         return category;
     }
@@ -213,6 +233,9 @@ public class CommonPersonalFile {
         this.star = star;
     }
 
+    /**
+     * 星级
+     */
     public Integer getStar() {
         return star;
     }
@@ -221,6 +244,9 @@ public class CommonPersonalFile {
         this.tags = tags;
     }
 
+    /**
+     * 标签
+     */
     public String getTags() {
         return tags;
     }
@@ -229,6 +255,11 @@ public class CommonPersonalFile {
         this.state = state;
     }
 
+    /**
+     * 状态
+     *
+     * @see top.lctr.naive.file.system.dto.PersonalFileState
+     */
     public String getState() {
         return state;
     }

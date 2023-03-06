@@ -18,7 +18,7 @@ import top.lctr.naive.file.system.dto.FileState;
 import top.lctr.naive.file.system.dto.FileType;
 import top.lctr.naive.file.system.dto.PersonalFileState;
 import top.lctr.naive.file.system.dto.StorageType;
-import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.CommonFile;
 import top.lctr.naive.file.system.entityFields.F_Fields;
 
 import java.io.File;

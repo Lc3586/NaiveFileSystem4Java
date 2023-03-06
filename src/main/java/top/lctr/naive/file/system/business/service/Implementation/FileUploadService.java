@@ -31,7 +31,7 @@ import top.lctr.naive.file.system.dto.fileUploadConfigDTO.Config;
 import top.lctr.naive.file.system.dto.fileUploadDTO.PreUploadChunkFileResponse;
 import top.lctr.naive.file.system.dto.fileUploadDTO.PreUploadFileResponse;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.CommonFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;

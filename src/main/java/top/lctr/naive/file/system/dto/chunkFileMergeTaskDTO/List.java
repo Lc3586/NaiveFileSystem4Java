@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.dto.chunkFileMergeTaskDTO;
 
 import project.extension.openapi.annotations.OpenApiMainTag;
-import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
 
 /**
  * 分片文件合并任务业务模型

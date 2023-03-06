@@ -1,11 +1,13 @@
 package top.lctr.naive.file.system.entityFields;
 
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
+
 /**
  * 分片文件合并任务对象实体字段
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask
+ * @see CommonChunkFileMergeTask
  */
 public class CFMT_Fields {
     /**

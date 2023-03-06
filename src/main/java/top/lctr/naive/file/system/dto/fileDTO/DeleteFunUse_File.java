@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.dto.fileDTO;
 
 import project.extension.mybatis.edge.annotations.EntityMapping;
-import top.lctr.naive.file.system.entity.common.CommonFile;
+import top.lctr.naive.file.system.entity.CommonFile;
 
 /**
  *

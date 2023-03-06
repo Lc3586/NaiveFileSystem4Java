@@ -1,7 +1,7 @@
 # 日志配置
 logging:
   level:
-    top.lctr: warn
+    top.lctr.naive.file.system: warn
     org.springframework: warn
 
 #文件服务配置

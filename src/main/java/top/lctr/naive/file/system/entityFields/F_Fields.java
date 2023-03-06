@@ -1,11 +1,13 @@
 package top.lctr.naive.file.system.entityFields;
 
+import top.lctr.naive.file.system.entity.CommonFile;
+
 /**
  * 文件信息对象实体字段
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.common.CommonFile
+ * @see CommonFile
  */
 public final class F_Fields {
     /**

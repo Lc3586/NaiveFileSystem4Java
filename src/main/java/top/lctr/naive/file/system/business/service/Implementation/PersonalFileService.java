@@ -14,6 +14,7 @@ import project.extension.mybatis.edge.core.provider.standard.INaiveSql;
 import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
 import project.extension.mybatis.edge.extention.datasearch.DataSearchDTO;
 import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
+import project.extension.mybatis.edge.model.DbType;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
 import project.extension.standard.entity.IEntityExtension;
@@ -26,7 +27,7 @@ import top.lctr.naive.file.system.dto.personalFileDTO.DownloadFunUse_Info;
 import top.lctr.naive.file.system.dto.personalFileDTO.Edit;
 import top.lctr.naive.file.system.dto.personalFileDTO.FunUse_Info;
 import top.lctr.naive.file.system.dto.personalFileDTO.PersonalFile;
-import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
 import top.lctr.naive.file.system.entityFields.PFI_Fields;
 
 import javax.servlet.http.HttpServletRequest;
@@ -197,8 +198,33 @@ public class PersonalFileService
             return repository_Key.select()
                                  .as(tableKeyAliasMap.get(defaultTableKey))
                                  .withSql(
-                                         "SELECT a.*, b.file_type, b.content_type, b.md5, b.storage_type, b.bytes, b.size FROM common_personal_file AS a \n"
-                                                 + "LEFT JOIN common_file AS b ON b.id = a.file_id ")
+                                         "SELECT a.*, b.`file_type`, b.`content_type`, b.`md5`, b.`storage_type`, b.`bytes`, b.`size` \r\n"
+                                                 + "FROM `common_personal_file` AS a \r\n"
+                                                 + "LEFT JOIN `common_file` AS b ON b.`id` = a.`file_id` ",
+                                         DbType.JdbcMySQL8,
+                                         DbType.JdbcMariaDB10)
+                                 .withSql(
+                                         "SELECT a.*, b.[FileType], b.[ContentType], b.[Md5], b.[StorageType], b.[Bytes], b.[Size] \r\n"
+                                                 + "FROM [CommonPersonalFile] AS a \r\n"
+                                                 + "LEFT JOIN [CommonFile] AS b ON b.[Id] = a.[FileId] ",
+                                         DbType.JdbcSqlServer,
+                                         DbType.JdbcSqlServer_2012_plus)
+                                 .withSql(
+                                         "SELECT a.*, b.\"FILE_TYPE\", b.\"CONTENT_TYPE\", b.\"MD5\", b.\"STORAGE_TYPE\", b.\"BYTES\", b.\"SIZE\" \r\n"
+                                                 + "FROM \"COMMON_PERSONAL_FILE\" AS a \r\n"
+                                                 + "LEFT JOIN \"COMMON_FILE\" AS b ON b.\"ID\" = a.\"FILE_ID\" ",
+                                         DbType.JdbcDameng6,
+                                         DbType.JdbcDameng7,
+                                         DbType.JdbcDameng8,
+                                         DbType.JdbcOracle12c,
+                                         DbType.JdbcOracle18c,
+                                         DbType.JdbcOracle19c,
+                                         DbType.JdbcOracle21c)
+                                 .withSql(
+                                         "SELECT a.*, b.\"FileType\", b.\"ContentType\", b.\"Md5\", b.\"StorageType\", b.\"Bytes\", b.\"Size\" \r\n"
+                                                 + "FROM \"CommonPersonalFile\" AS a \r\n"
+                                                 + "LEFT JOIN \"CommonFile\" AS b ON b.\"Id\" = a.\"FileId\" ",
+                                         DbType.JdbcPostgreSQL15)
                                  .where(x -> x.and(DataSearchExtension.toDynamicFilter(dataSearch.getFilters(),
                                                                                        tableKeyAliasMap)))
                                  .orderBy(x -> dataSearch.getOrder() == null
@@ -221,8 +247,29 @@ public class PersonalFileService
         try {
             PersonalFile data = repository_Key.select()
                                               .withSql(
-                                                      "SELECT a.*, b.file_type, b.content_type, b.md5, b.storage_type, b.bytes, b.size FROM common_personal_file AS a \n"
-                                                              + "LEFT JOIN common_file AS b ON b.id = a.file_id ")
+                                                      "SELECT a.*, b.`file_type`, b.`content_type`, b.`md5`, b.`storage_type`, b.`bytes`, b.`size` FROM `common_personal_file` AS a \r\n"
+                                                              + "LEFT JOIN `common_file` AS b ON b.`id` = a.`file_id` ",
+                                                      DbType.JdbcMySQL8,
+                                                      DbType.JdbcMariaDB10)
+                                              .withSql(
+                                                      "SELECT a.*, b.[FileType], b.[ContentType], b.[Md5], b.[StorageType], b.[Bytes], b.[Size] FROM [CommonPersonalFile] AS a \r\n"
+                                                              + "LEFT JOIN [CommonFile] AS b ON b.[Id] = a.[FileId] ",
+                                                      DbType.JdbcSqlServer,
+                                                      DbType.JdbcSqlServer_2012_plus)
+                                              .withSql(
+                                                      "SELECT a.*, b.\"FILE_TYPE\", b.\"CONTENT_TYPE\", b.\"MD5\", b.\"STORAGE_TYPE\", b.\"BYTES\", b.\"SIZE\" FROM \"COMMON_PERSONAL_FILE\" AS a \r\n"
+                                                              + "LEFT JOIN \"COMMON_FILE\" AS b ON b.\"ID\" = a.\"FILE_ID\" ",
+                                                      DbType.JdbcDameng6,
+                                                      DbType.JdbcDameng7,
+                                                      DbType.JdbcDameng8,
+                                                      DbType.JdbcOracle12c,
+                                                      DbType.JdbcOracle18c,
+                                                      DbType.JdbcOracle19c,
+                                                      DbType.JdbcOracle21c)
+                                              .withSql(
+                                                      "SELECT a.*, b.\"FileType\", b.\"ContentType\", b.\"Md5\", b.\"StorageType\", b.\"Bytes\", b.\"Size\" FROM \"CommonPersonalFile\" AS a \r\n"
+                                                              + "LEFT JOIN \"CommonFile\" AS b ON b.\"Id\" = a.\"FileId\" ",
+                                                      DbType.JdbcPostgreSQL15)
                                               .where(x -> x.and(PFI_Fields.id,
                                                                 FilterCompare.Eq,
                                                                 id))
@@ -306,8 +353,29 @@ public class PersonalFileService
             return repository_Key.select()
                                  .as(tableKeyAliasMap.get(defaultTableKey))
                                  .withSql(
-                                         "SELECT a.*, b.file_type, b.content_type, b.md5, b.storage_type, b.bytes, b.size FROM common_personal_file AS a \n"
-                                                 + "LEFT JOIN common_file AS b ON b.id = a.file_id ")
+                                         "SELECT a.*, b.`file_type`, b.`content_type`, b.`md5`, b.`storage_type`, b.`bytes`, b.`size` FROM `common_personal_file` AS a \r\n"
+                                                 + "LEFT JOIN `common_file` AS b ON b.`id` = a.`file_id` ",
+                                         DbType.JdbcMySQL8,
+                                         DbType.JdbcMariaDB10)
+                                 .withSql(
+                                         "SELECT a.*, b.[FileType], b.[ContentType], b.[Md5], b.[StorageType], b.[Bytes], b.[Size] FROM [CommonPersonalFile] AS a \r\n"
+                                                 + "LEFT JOIN [CommonFile] AS b ON b.[Id] = a.[FileId] ",
+                                         DbType.JdbcSqlServer,
+                                         DbType.JdbcSqlServer_2012_plus)
+                                 .withSql(
+                                         "SELECT a.*, b.\"FILE_TYPE\", b.\"CONTENT_TYPE\", b.\"MD5\", b.\"STORAGE_TYPE\", b.\"BYTES\", b.\"SIZE\" FROM \"COMMON_PERSONAL_FILE\" AS a \r\n"
+                                                 + "LEFT JOIN \"COMMON_FILE\" AS b ON b.\"ID\" = a.\"FILE_ID\" ",
+                                         DbType.JdbcDameng6,
+                                         DbType.JdbcDameng7,
+                                         DbType.JdbcDameng8,
+                                         DbType.JdbcOracle12c,
+                                         DbType.JdbcOracle18c,
+                                         DbType.JdbcOracle19c,
+                                         DbType.JdbcOracle21c)
+                                 .withSql(
+                                         "SELECT a.*, b.\"FileType\", b.\"ContentType\", b.\"Md5\", b.\"StorageType\", b.\"Bytes\", b.\"Size\" FROM \"CommonPersonalFile\" AS a \r\n"
+                                                 + "LEFT JOIN \"CommonFile\" AS b ON b.\"Id\" = a.\"FileId\" ",
+                                         DbType.JdbcPostgreSQL15)
                                  .where(x -> x.and(PFI_Fields.id,
                                                    FilterCompare.InSet,
                                                    ids))

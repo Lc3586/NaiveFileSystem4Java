@@ -9,7 +9,7 @@ import top.lctr.naive.file.system.business.service.Interface.IChunkFileMergeTask
 import top.lctr.naive.file.system.business.service.Interface.IChunkFileService;
 import top.lctr.naive.file.system.config.UploadLargeFileConfig;
 import top.lctr.naive.file.system.dto.CFMTState;
-import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
 import top.lctr.naive.file.system.entityFields.CFMT_Fields;
 
 import java.text.SimpleDateFormat;

@@ -1,7 +1,7 @@
 package top.lctr.naive.file.system.dto.personalFileDTO;
 
 import project.extension.mybatis.edge.annotations.EntityMapping;
-import top.lctr.naive.file.system.entity.common.CommonPersonalFile;
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
 
 /**
  * 文件信息

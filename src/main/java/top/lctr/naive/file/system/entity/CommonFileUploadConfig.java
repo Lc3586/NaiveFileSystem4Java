@@ -1,4 +1,4 @@
-package top.lctr.naive.file.system.entity.common;
+package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
@@ -14,7 +14,7 @@ import project.extension.openapi.annotations.*;
 import java.util.Date;
 
 /**
- * 文件上传配置对象
+ * 文件上传配置
  *
  * @author LCTR
  * @date 2022-12-07
@@ -29,9 +29,9 @@ public class CommonFileUploadConfig {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 文件上传配置Id
+     * 主键
      */
-    @OpenApiDescription("文件上传配置Id")
+    @OpenApiDescription("主键")
     @ColumnSetting(isPrimaryKey = true,
                    length = 36)
     @OpenApiSubTag({"List",
@@ -42,9 +42,9 @@ public class CommonFileUploadConfig {
     private String id;
 
     /**
-     * 根Id
+     * 根主键
      */
-    @OpenApiDescription("根Id")
+    @OpenApiDescription("根主键")
     @ColumnSetting(length = 36)
     @OpenApiSubTag({"List",
                     "Detail",
@@ -52,9 +52,9 @@ public class CommonFileUploadConfig {
     private String rootId;
 
     /**
-     * 父Id
+     * 父主键
      */
-    @OpenApiDescription("父Id")
+    @OpenApiDescription("父主键")
     @ColumnSetting(length = 36)
     @OpenApiSubTag({"List",
                     "Create",
@@ -67,6 +67,7 @@ public class CommonFileUploadConfig {
      * 层级
      */
     @OpenApiDescription("层级")
+    @ColumnSetting(isNullable = false)
     @OpenApiSubTag({"List",
                     "Detail",
                     "_Import"})
@@ -76,6 +77,8 @@ public class CommonFileUploadConfig {
      * 编码
      */
     @OpenApiDescription("编码")
+    @ColumnSetting(length = 36,
+                   isNullable = false)
     @OpenApiSubTag({"List",
                     "Create",
                     "Edit",
@@ -117,6 +120,7 @@ public class CommonFileUploadConfig {
      * 名称
      */
     @OpenApiDescription("名称")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Create",
                     "Edit",
@@ -130,6 +134,7 @@ public class CommonFileUploadConfig {
      * 显示名称
      */
     @OpenApiDescription("显示名称")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Create",
                     "Edit",
@@ -238,6 +243,7 @@ public class CommonFileUploadConfig {
      * <p>2、此值为空时未禁止即允许</p>
      */
     @OpenApiDescription("允许的MIME类型")
+    @ColumnSetting(length = -4)
     @OpenApiSubTag({"_Edit",
                     "_Detail",
                     "_Config",
@@ -251,6 +257,7 @@ public class CommonFileUploadConfig {
      * <p>2、此值为空时皆可允许</p>
      */
     @OpenApiDescription("禁止的MIME类型")
+    @ColumnSetting(length = -4)
     @OpenApiSubTag({"_Edit",
                     "_Detail",
                     "_Config",
@@ -262,7 +269,7 @@ public class CommonFileUploadConfig {
      * 说明
      */
     @OpenApiDescription("说明")
-    @ColumnSetting(length = -1)
+    @ColumnSetting(length = -4)
     @OpenApiSubTag({"Create",
                     "Edit",
                     "Detail",
@@ -296,6 +303,7 @@ public class CommonFileUploadConfig {
      * 备注
      */
     @OpenApiDescription("备注")
+    @ColumnSetting(length = -4)
     @OpenApiSubTag({"Detail",
                     "Create",
                     "Edit",
@@ -307,6 +315,7 @@ public class CommonFileUploadConfig {
      * 创建者
      */
     @OpenApiDescription("创建者")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"List",
                     "Detail",
                     "Import",
@@ -329,6 +338,7 @@ public class CommonFileUploadConfig {
      * 更新者
      */
     @OpenApiDescription("更新者")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"Detail",
                     "__Edit",
                     "Import",
@@ -352,6 +362,9 @@ public class CommonFileUploadConfig {
         this.id = id;
     }
 
+    /**
+     * 主键
+     */
     public String getId() {
         return id;
     }
@@ -360,10 +373,16 @@ public class CommonFileUploadConfig {
         this.rootId = rootId;
     }
 
+    /**
+     * 根主键
+     */
     public String getRootId() {
         return rootId;
     }
 
+    /**
+     * 父主键
+     */
     public String getParentId() {
         return parentId;
     }
@@ -376,6 +395,9 @@ public class CommonFileUploadConfig {
         this.level = level;
     }
 
+    /**
+     * 层级
+     */
     public Integer getLevel() {
         return level;
     }
@@ -384,6 +406,9 @@ public class CommonFileUploadConfig {
         this.code = code;
     }
 
+    /**
+     * 编码
+     */
     public String getCode() {
         return code;
     }
@@ -392,6 +417,10 @@ public class CommonFileUploadConfig {
         this.referenceId = referenceId;
     }
 
+    /**
+     * 引用的上传配置Id
+     * <p>1、引用文件MIME类型，会合并当前数据以及引用数据</p>
+     */
     public String getReferenceId() {
         return referenceId;
     }
@@ -400,6 +429,10 @@ public class CommonFileUploadConfig {
         this.referenceTree = referenceTree;
     }
 
+    /**
+     * 级联引用
+     * <p>1、使用引用的上传配置以及它的所有子集配置</p>
+     */
     public Boolean getReferenceTree() {
         return referenceTree;
     }
@@ -408,6 +441,9 @@ public class CommonFileUploadConfig {
         this.name = name;
     }
 
+    /**
+     * 名称
+     */
     public String getName() {
         return name;
     }
@@ -416,6 +452,9 @@ public class CommonFileUploadConfig {
         this.displayName = displayName;
     }
 
+    /**
+     * 显示名称
+     */
     public String getDisplayName() {
         return displayName;
     }
@@ -424,6 +463,9 @@ public class CommonFileUploadConfig {
         this.public_ = public_;
     }
 
+    /**
+     * 公共配置（无需授权）
+     */
     public Boolean getPublic_() {
         return public_;
     }
@@ -432,6 +474,9 @@ public class CommonFileUploadConfig {
         this.lowerLimit = lowerLimit;
     }
 
+    /**
+     * 文件数量下限
+     */
     public Integer getLowerLimit() {
         return lowerLimit;
     }
@@ -440,10 +485,16 @@ public class CommonFileUploadConfig {
         this.upperLimit = upperLimit;
     }
 
+    /**
+     * 文件数量上限
+     */
     public Integer getUpperLimit() {
         return upperLimit;
     }
 
+    /**
+     * 单个文件大小下限（单位 KB）
+     */
     public Double getLowerSingleSize() {
         return lowerSingleSize;
     }
@@ -452,6 +503,9 @@ public class CommonFileUploadConfig {
         this.lowerSingleSize = lowerSingleSize;
     }
 
+    /**
+     * 单个文件大小上限（单位 KB）
+     */
     public Double getUpperSingleSize() {
         return upperSingleSize;
     }
@@ -460,6 +514,9 @@ public class CommonFileUploadConfig {
         this.upperSingleSize = upperSingleSize;
     }
 
+    /**
+     * 所有文件整体大小下限（单位 KB）
+     */
     public Double getLowerTotalSize() {
         return lowerTotalSize;
     }
@@ -468,6 +525,9 @@ public class CommonFileUploadConfig {
         this.lowerTotalSize = lowerTotalSize;
     }
 
+    /**
+     * 所有文件整体大小上限（单位 KB）
+     */
     public Double getUpperTotalSize() {
         return upperTotalSize;
     }
@@ -480,6 +540,11 @@ public class CommonFileUploadConfig {
         this.allowedTypes = allowedTypes;
     }
 
+    /**
+     * 允许的MIME类型
+     * <p>1、[,]逗号分隔</p>
+     * <p>2、此值为空时未禁止即允许</p>
+     */
     public String getAllowedTypes() {
         return allowedTypes;
     }
@@ -488,6 +553,11 @@ public class CommonFileUploadConfig {
         this.prohibitedTypes = prohibitedTypes;
     }
 
+    /**
+     * 禁止的MIME类型
+     * <p>1、[,]逗号分隔</p>
+     * <p>2、此值为空时皆可允许</p>
+     */
     public String getProhibitedTypes() {
         return prohibitedTypes;
     }
@@ -496,6 +566,9 @@ public class CommonFileUploadConfig {
         this.explain = explain;
     }
 
+    /**
+     * 说明
+     */
     public String getExplain() {
         return explain;
     }
@@ -504,6 +577,9 @@ public class CommonFileUploadConfig {
         this.sort = sort;
     }
 
+    /**
+     * 排序值
+     */
     public Integer getSort() {
         return sort;
     }
@@ -512,6 +588,9 @@ public class CommonFileUploadConfig {
         this.enable = enable;
     }
 
+    /**
+     * 启用
+     */
     public Boolean getEnable() {
         return enable;
     }

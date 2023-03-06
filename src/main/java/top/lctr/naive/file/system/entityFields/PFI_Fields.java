@@ -1,11 +1,13 @@
 package top.lctr.naive.file.system.entityFields;
 
+import top.lctr.naive.file.system.entity.CommonPersonalFile;
+
 /**
  * 个人文件信息对象实体字段
  *
  * @author LCTR
  * @date 2022-12-07
- * @see top.lctr.naive.file.system.entity.common.CommonPersonalFile
+ * @see CommonPersonalFile
  */
 public final class PFI_Fields {
     /**

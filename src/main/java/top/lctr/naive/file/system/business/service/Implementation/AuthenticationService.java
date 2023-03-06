@@ -21,7 +21,7 @@ public class AuthenticationService
 
     @Override
     public boolean isAuthenticated() {
-        return false;
+        return true;
     }
 
     @Override
@@ -37,5 +37,10 @@ public class AuthenticationService
     @Override
     public Optional<Operator> tryGetOperator() {
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isAuthorized(String... permission) {
+        return true;
     }
 }

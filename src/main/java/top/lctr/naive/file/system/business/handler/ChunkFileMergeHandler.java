@@ -24,7 +24,7 @@ import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_FileState;
 import top.lctr.naive.file.system.dto.chunkFileDTO.FunUse_ForMerge;
 import top.lctr.naive.file.system.dto.chunkFileMergeTaskDTO.ActivityInfo;
 import top.lctr.naive.file.system.dto.chunkFileMergeTaskDTO.ChunksSourceInfo;
-import top.lctr.naive.file.system.entity.common.CommonChunkFileMergeTask;
+import top.lctr.naive.file.system.entity.CommonChunkFileMergeTask;
 import top.lctr.naive.file.system.entityFields.CFMT_Fields;
 
 import java.io.File;

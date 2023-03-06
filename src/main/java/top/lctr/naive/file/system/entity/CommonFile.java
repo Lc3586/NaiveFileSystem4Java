@@ -1,4 +1,4 @@
-package top.lctr.naive.file.system.entity.common;
+package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
@@ -17,7 +17,7 @@ import project.extension.openapi.annotations.OpenApiSubTag;
 import java.util.Date;
 
 /**
- * 文件信息对象
+ * 文件信息
  *
  * @author LCTR
  * @date 2022-12-07
@@ -32,9 +32,9 @@ public class CommonFile {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 文件Id
+     * 主键
      */
-    @OpenApiDescription("文件Id")
+    @OpenApiDescription("主键")
     @ColumnSetting(isPrimaryKey = true,
                    length = 36)
     @OpenApiSubTag("FileInfo")
@@ -44,6 +44,7 @@ public class CommonFile {
      * 名称
      */
     @OpenApiDescription("名称")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag("FileInfo")
     private String name;
 
@@ -53,6 +54,7 @@ public class CommonFile {
      * @see top.lctr.naive.file.system.dto.FileType
      */
     @OpenApiDescription("文件类型")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag("FileInfo")
     private String fileType;
 
@@ -60,6 +62,7 @@ public class CommonFile {
      * 内容类型
      */
     @OpenApiDescription("内容类型")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag("FileInfo")
     private String contentType;
 
@@ -67,13 +70,15 @@ public class CommonFile {
      * 文件扩展名
      */
     @OpenApiDescription("文件扩展名")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag("FileInfo")
     private String extension;
 
     /**
-     * MD5校验值
+     * 文件MD5校验值
      */
-    @OpenApiDescription("MD5校验值")
+    @OpenApiDescription("文件MD5校验值")
+    @ColumnSetting(length = 36)
     @OpenApiSubTag("FileInfo")
     private String md5;
 
@@ -81,6 +86,7 @@ public class CommonFile {
      * 服务器标识
      */
     @OpenApiDescription("服务器标识")
+    @ColumnSetting(length = 36)
     @OpenApiSubTag("FileInfo")
     private String serverKey;
 
@@ -90,6 +96,7 @@ public class CommonFile {
      * @see top.lctr.naive.file.system.dto.StorageType
      */
     @OpenApiDescription("存储类型")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag("FileInfo")
     private String storageType;
 
@@ -97,6 +104,7 @@ public class CommonFile {
      * 文件相对路径
      */
     @OpenApiDescription("文件相对路径")
+    @ColumnSetting(length = 2048)
     @OpenApiSubTag("_List")
     private String path;
 
@@ -113,6 +121,7 @@ public class CommonFile {
      * 文件大小
      */
     @OpenApiDescription("文件大小")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag("FileInfo")
     private String size;
 
@@ -122,6 +131,7 @@ public class CommonFile {
      * @see top.lctr.naive.file.system.dto.FileState
      */
     @OpenApiDescription("状态")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag("FileInfo")
     private String state;
 
@@ -138,6 +148,9 @@ public class CommonFile {
         this.id = id;
     }
 
+    /**
+     * 主键
+     */
     public String getId() {
         return id;
     }
@@ -146,6 +159,9 @@ public class CommonFile {
         this.name = name;
     }
 
+    /**
+     * 名称
+     */
     public String getName() {
         return name;
     }
@@ -154,6 +170,11 @@ public class CommonFile {
         this.fileType = fileType;
     }
 
+    /**
+     * 文件类型
+     *
+     * @see top.lctr.naive.file.system.dto.FileType
+     */
     public String getFileType() {
         return fileType;
     }
@@ -162,6 +183,9 @@ public class CommonFile {
         this.contentType = contentType;
     }
 
+    /**
+     * 内容类型
+     */
     public String getContentType() {
         return contentType;
     }
@@ -170,6 +194,9 @@ public class CommonFile {
         this.extension = extension;
     }
 
+    /**
+     * 文件扩展名
+     */
     public String getExtension() {
         return extension;
     }
@@ -178,6 +205,9 @@ public class CommonFile {
         this.md5 = md5;
     }
 
+    /**
+     * MD5校验值
+     */
     public String getMd5() {
         return md5;
     }
@@ -186,6 +216,9 @@ public class CommonFile {
         this.serverKey = serverKey;
     }
 
+    /**
+     * 服务器标识
+     */
     public String getServerKey() {
         return serverKey;
     }
@@ -194,6 +227,11 @@ public class CommonFile {
         this.storageType = storageType;
     }
 
+    /**
+     * 存储类型
+     *
+     * @see top.lctr.naive.file.system.dto.StorageType
+     */
     public String getStorageType() {
         return storageType;
     }
@@ -202,6 +240,9 @@ public class CommonFile {
         this.path = path;
     }
 
+    /**
+     * 文件相对路径
+     */
     public String getPath() {
         return path;
     }
@@ -210,6 +251,9 @@ public class CommonFile {
         this.bytes = bytes;
     }
 
+    /**
+     * 字节数
+     */
     public Long getBytes() {
         return bytes;
     }
@@ -218,6 +262,9 @@ public class CommonFile {
         this.size = size;
     }
 
+    /**
+     * 文件大小
+     */
     public String getSize() {
         return size;
     }
@@ -226,6 +273,11 @@ public class CommonFile {
         this.state = state;
     }
 
+    /**
+     * 状态
+     *
+     * @see top.lctr.naive.file.system.dto.FileState
+     */
     public String getState() {
         return state;
     }

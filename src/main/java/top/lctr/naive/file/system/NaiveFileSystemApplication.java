@@ -16,7 +16,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},
                        scanBasePackages = {
                                "project.extension",
-                               "top.lctr"
+                               "top.lctr.naive.file.system"
                        })
 public class NaiveFileSystemApplication {
     public static void main(String[] args) {

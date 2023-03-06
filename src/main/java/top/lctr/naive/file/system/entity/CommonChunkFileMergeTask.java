@@ -1,4 +1,4 @@
-package top.lctr.naive.file.system.entity.common;
+package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
@@ -15,7 +15,7 @@ import project.extension.openapi.annotations.*;
 import java.util.Date;
 
 /**
- * 分片文件合并任务对象
+ * 分片文件合并任务
  *
  * @author LCTR
  * @date 2022-12-07
@@ -30,9 +30,9 @@ public class CommonChunkFileMergeTask {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 分片文件合并任务Id
+     * 主键
      */
-    @OpenApiDescription("分片文件合并任务Id")
+    @OpenApiDescription("主键")
     @OpenApiSubTag({"List",
                     "Detail"})
     @ColumnSetting(isPrimaryKey = true,
@@ -43,6 +43,7 @@ public class CommonChunkFileMergeTask {
      * 服务器标识
      */
     @OpenApiDescription("服务器标识")
+    @ColumnSetting(length = 36)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String serverKey;
@@ -51,6 +52,7 @@ public class CommonChunkFileMergeTask {
      * 文件MD5校验值
      */
     @OpenApiDescription("文件MD5校验值")
+    @ColumnSetting(length = 36)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String md5;
@@ -59,6 +61,7 @@ public class CommonChunkFileMergeTask {
      * 文件名称
      */
     @OpenApiDescription("文件名称")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String name;
@@ -67,6 +70,7 @@ public class CommonChunkFileMergeTask {
      * 内容类型
      */
     @OpenApiDescription("内容类型")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String contentType;
@@ -75,6 +79,7 @@ public class CommonChunkFileMergeTask {
      * 文件扩展名
      */
     @OpenApiDescription("文件扩展名")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String extension;
@@ -93,6 +98,7 @@ public class CommonChunkFileMergeTask {
      * 文件大小
      */
     @OpenApiDescription("文件大小")
+    @ColumnSetting(length = 255)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String size;
@@ -101,13 +107,14 @@ public class CommonChunkFileMergeTask {
      * 合并的文件存储路径
      */
     @OpenApiDescription("合并的文件存储路径")
-    @ColumnSetting(length = -1)
+    @ColumnSetting(length = 2048)
     private String path;
 
     /**
      * 分片规格
      */
     @OpenApiDescription("分片规格")
+    @ColumnSetting(isNullable = false)
     @OpenApiSubTag({"List",
                     "Detail"})
     private Integer specs;
@@ -116,6 +123,7 @@ public class CommonChunkFileMergeTask {
      * 分片总数
      */
     @OpenApiDescription("分片总数")
+    @ColumnSetting(isNullable = false)
     @OpenApiSubTag({"List",
                     "Detail"})
     private Integer total;
@@ -124,6 +132,7 @@ public class CommonChunkFileMergeTask {
      * 当前处理分片的索引
      */
     @OpenApiDescription("当前处理分片的索引")
+    @ColumnSetting(isNullable = false)
     private Integer currentChunkIndex;
 
     /**
@@ -132,6 +141,7 @@ public class CommonChunkFileMergeTask {
      * @see top.lctr.naive.file.system.dto.CFMTState
      */
     @OpenApiDescription("状态")
+    @ColumnSetting(length = 50)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String state;
@@ -140,7 +150,7 @@ public class CommonChunkFileMergeTask {
      * 信息
      */
     @OpenApiDescription("信息")
-    @ColumnSetting(length = -1)
+    @ColumnSetting(length = -4)
     @OpenApiSubTag({"List",
                     "Detail"})
     private String info;
@@ -179,6 +189,9 @@ public class CommonChunkFileMergeTask {
         this.id = id;
     }
 
+    /**
+     * 主键
+     */
     public String getId() {
         return id;
     }
@@ -187,6 +200,9 @@ public class CommonChunkFileMergeTask {
         this.serverKey = serverKey;
     }
 
+    /**
+     * 服务器标识
+     */
     public String getServerKey() {
         return serverKey;
     }
@@ -195,6 +211,9 @@ public class CommonChunkFileMergeTask {
         this.md5 = md5;
     }
 
+    /**
+     * 文件MD5校验值
+     */
     public String getMd5() {
         return md5;
     }
@@ -203,6 +222,9 @@ public class CommonChunkFileMergeTask {
         this.name = name;
     }
 
+    /**
+     * 文件名称
+     */
     public String getName() {
         return name;
     }
@@ -211,6 +233,9 @@ public class CommonChunkFileMergeTask {
         this.contentType = contentType;
     }
 
+    /**
+     * 内容类型
+     */
     public String getContentType() {
         return contentType;
     }
@@ -219,6 +244,9 @@ public class CommonChunkFileMergeTask {
         this.extension = extension;
     }
 
+    /**
+     * 文件扩展名
+     */
     public String getExtension() {
         return extension;
     }
@@ -227,6 +255,9 @@ public class CommonChunkFileMergeTask {
         this.bytes = bytes;
     }
 
+    /**
+     * 字节数
+     */
     public Long getBytes() {
         return bytes;
     }
@@ -235,6 +266,9 @@ public class CommonChunkFileMergeTask {
         this.size = size;
     }
 
+    /**
+     * 文件大小
+     */
     public String getSize() {
         return size;
     }
@@ -243,6 +277,9 @@ public class CommonChunkFileMergeTask {
         this.path = path;
     }
 
+    /**
+     * 合并的文件存储路径
+     */
     public String getPath() {
         return path;
     }
@@ -251,6 +288,9 @@ public class CommonChunkFileMergeTask {
         this.specs = specs;
     }
 
+    /**
+     * 分片规格
+     */
     public Integer getSpecs() {
         return specs;
     }
@@ -259,6 +299,9 @@ public class CommonChunkFileMergeTask {
         this.total = total;
     }
 
+    /**
+     * 分片总数
+     */
     public Integer getTotal() {
         return total;
     }
@@ -267,6 +310,9 @@ public class CommonChunkFileMergeTask {
         this.currentChunkIndex = currentChunkIndex;
     }
 
+    /**
+     * 当前处理分片的索引
+     */
     public Integer getCurrentChunkIndex() {
         return currentChunkIndex;
     }
@@ -275,6 +321,11 @@ public class CommonChunkFileMergeTask {
         this.state = state;
     }
 
+    /**
+     * 状态
+     *
+     * @see top.lctr.naive.file.system.dto.CFMTState
+     */
     public String getState() {
         return state;
     }
@@ -283,10 +334,16 @@ public class CommonChunkFileMergeTask {
         this.info = info;
     }
 
+    /**
+     * 信息
+     */
     public String getInfo() {
         return info;
     }
 
+    /**
+     * 完成时间
+     */
     public Date getCompletedTime() {
         return completedTime;
     }

@@ -12,18 +12,19 @@ import project.extension.mybatis.edge.core.provider.standard.curd.ISelect;
 import project.extension.mybatis.edge.dbContext.repository.IBaseRepository_Key;
 import project.extension.mybatis.edge.extention.datasearch.DataSearchExtension;
 import project.extension.mybatis.edge.extention.datasearch.TreeDataSearchDTO;
+import project.extension.mybatis.edge.model.DbType;
 import project.extension.mybatis.edge.model.FilterCompare;
 import project.extension.mybatis.edge.model.NullResultException;
 import project.extension.mybatis.edge.model.OperationSymbol;
-import project.extension.standard.datasort.DataSortDTO;
-import project.extension.standard.datasort.SortMethod;
-import project.extension.standard.datasort.TreeDragSortDTO;
+import project.extension.standard.api.request.datasort.DataSortDTO;
+import project.extension.standard.api.request.datasort.SortMethod;
+import project.extension.standard.api.request.datasort.TreeDragSortDTO;
 import project.extension.standard.entity.IEntityExtension;
 import project.extension.standard.exception.BusinessException;
 import project.extension.string.StringExtension;
 import top.lctr.naive.file.system.business.service.Interface.IFileUploadConfigService;
 import top.lctr.naive.file.system.dto.fileUploadConfigDTO.*;
-import top.lctr.naive.file.system.entity.common.CommonFileUploadConfig;
+import top.lctr.naive.file.system.entity.CommonFileUploadConfig;
 import top.lctr.naive.file.system.entityFields.FUC_Fields;
 
 import java.util.*;
@@ -154,32 +155,79 @@ public class FileUploadConfigService
         if (id.equals(referenceId))
             return true;
 
-        String sql = String.format("SELECT COUNT(1) FROM(\n"
-                                           + "WITH \"as_tree_cte\"(cte_level, \"ID\", \"REFERENCE_ID\", \"REFERENCE_TREE\")\n"
-                                           + "as\n"
-                                           + "(\n"
-                                           + "SELECT 0 as cte_level, a.\"ID\", a.\"REFERENCE_ID\", a.\"REFERENCE_TREE\" \n"
-                                           + "FROM \"COMMON_FILE_UPLOAD_CONFIG\" a \n"
-                                           + "WHERE (a.\"ID\" = '%s')\n"
-                                           + "\n"
-                                           + "union all\n"
-                                           + "\n"
-                                           + "SELECT wct1.cte_level + 1 as cte_level, wct2.\"ID\", wct2.\"REFERENCE_ID\" , wct2.\"REFERENCE_TREE\"  \n"
-                                           + "FROM \"as_tree_cte\" wct1 \n"
-                                           + "INNER JOIN \"COMMON_FILE_UPLOAD_CONFIG\" wct2 ON wct2.\"ID\" = wct1.\"REFERENCE_ID\"\n"
-                                           + "WHERE wct1.\"REFERENCE_TREE\" = 1 AND wct1.cte_level < %s\n"
-                                           + ")\n"
-                                           + "SELECT a.\"ID\", COUNT(1) as \"TOTAL\"\n"
-                                           + "FROM \"as_tree_cte\" a \n"
-                                           + "GROUP BY a.\"ID\"\n"
-                                           + ") b\n"
-                                           + "WHERE b.\"TOTAL\" > 1",
-                                   referenceId,
-                                   //防止无限递归
-                                   1000);
-
         return repository_Key.select()
-                             .withSql(sql)
+                             //TODO 递归查询sql语句待完成
+                             .withSql(
+                                     String.format("",
+                                                   referenceId,
+                                                   //防止无限递归
+                                                   1000),
+                                     DbType.JdbcMySQL8,
+                                     DbType.JdbcMariaDB10)
+                             .withSql(
+                                     String.format("WITH [as_tree_cte]\n"
+                                                           + "as\n"
+                                                           + "(\n"
+                                                           + "SELECT 1 AS [cte_level], [a].[Id], [a[.[ReferenceId], [a].[ReferenceTree]\n"
+                                                           + "FROM [dbo].[CommonFileUploadConfig] [a]\n"
+                                                           + "WHERE([a].[Id] = '%s')\n"
+                                                           + "\n"
+                                                           + "UNION ALL\n"
+                                                           + "\n"
+                                                           + "SELECT [wct1].[cte_level] + 1 AS [cte_level], [wct2].[Id], [wct2].[ReferenceId], [wct2].[ReferenceTree]\n"
+                                                           + "FROM [as_tree_cte] [wct1]\n"
+                                                           + "INNER JOIN [dbo].[CommonFileUploadConfig] [wct2] ON [wct2].[Id] = [wct1].[ReferenceId]\n"
+                                                           + "WHERE [wct1].[ReferenceTree] = 1 AND [wct1].[cte_level] < %s\n"
+                                                           + ")\n"
+                                                           + "SELECT COUNT(1)  FROM\n"
+                                                           + "(\n"
+                                                           + "SELECT [a].[Id], COUNT(1) [SUM]\n"
+                                                           + "FROM [as_tree_cte] [a]\n"
+                                                           + "GROUP BY [a].[Id]\n"
+                                                           + ") [b]\n"
+                                                           + "WHERE [b].[SUM] > 1",
+                                                   referenceId,
+                                                   //防止无限递归
+                                                   100),
+                                     DbType.JdbcSqlServer,
+                                     DbType.JdbcSqlServer_2012_plus)
+                             .withSql(
+                                     String.format("SELECT COUNT(1) FROM(\n"
+                                                           + "WITH \"as_tree_cte\"(cte_level, \"ID\", \"REFERENCE_ID\", \"REFERENCE_TREE\")\n"
+                                                           + "as\n"
+                                                           + "(\n"
+                                                           + "SELECT 0 as cte_level, a.\"ID\", a.\"REFERENCE_ID\", a.\"REFERENCE_TREE\" \n"
+                                                           + "FROM \"COMMON_FILE_UPLOAD_CONFIG\" a \n"
+                                                           + "WHERE (a.\"ID\" = '%s')\n"
+                                                           + "\n"
+                                                           + "union all\n"
+                                                           + "\n"
+                                                           + "SELECT wct1.cte_level + 1 as cte_level, wct2.\"ID\", wct2.\"REFERENCE_ID\" , wct2.\"REFERENCE_TREE\"  \n"
+                                                           + "FROM \"as_tree_cte\" wct1 \n"
+                                                           + "INNER JOIN \"COMMON_FILE_UPLOAD_CONFIG\" wct2 ON wct2.\"ID\" = wct1.\"REFERENCE_ID\"\n"
+                                                           + "WHERE wct1.\"REFERENCE_TREE\" = 1 AND wct1.cte_level < %s\n"
+                                                           + ")\n"
+                                                           + "SELECT a.\"ID\", COUNT(1) as \"TOTAL\"\n"
+                                                           + "FROM \"as_tree_cte\" a \n"
+                                                           + "GROUP BY a.\"ID\"\n"
+                                                           + ") ",
+                                                   referenceId,
+                                                   //防止无限递归
+                                                   100),
+                                     DbType.JdbcDameng6,
+                                     DbType.JdbcDameng7,
+                                     DbType.JdbcDameng8,
+                                     DbType.JdbcOracle12c,
+                                     DbType.JdbcOracle18c,
+                                     DbType.JdbcOracle19c,
+                                     DbType.JdbcOracle21c)
+                             //TODO 递归查询sql语句待完成
+                             .withSql(
+                                     String.format("",
+                                                   referenceId,
+                                                   //防止无限递归
+                                                   100),
+                                     DbType.JdbcPostgreSQL15)
                              .any();
     }
 
@@ -189,31 +237,121 @@ public class FileUploadConfigService
      * @param config 配置
      */
     private void getReferenceConfig(Config config) {
-        String sql = String.format(
-                "WITH \"as_tree_cte\"(cte_level, \"ID\", \"ALLOWED_TYPES\", \"PROHIBITED_TYPES\", \"REFERENCE_ID\" , \"REFERENCE_TREE\")\n"
-                        + "as\n"
-                        + "(\n"
-                        + "SELECT 0 as cte_level, a.\"ID\", a.\"ALLOWED_TYPES\", a.\"PROHIBITED_TYPES\", a.\"REFERENCE_ID\" , a.\"REFERENCE_TREE\"\n"
-                        + "FROM \"COMMON_FILE_UPLOAD_CONFIG\" a \n"
-                        + "WHERE (a.\"ID\" = '%s' AND a.\"ENABLE\" = 1)\n"
-                        + "\n"
-                        + "union all\n"
-                        + "\n"
-                        + "SELECT wct1.cte_level + 1 as cte_level, wct2.\"ID\", wct2.\"ALLOWED_TYPES\", wct2.\"PROHIBITED_TYPES\", wct2.\"REFERENCE_ID\" , wct2.\"REFERENCE_TREE\"  \n"
-                        + "FROM \"as_tree_cte\" wct1 \n"
-                        + "INNER JOIN \"COMMON_FILE_UPLOAD_CONFIG\" wct2 ON wct2.\"ID\" = wct1.\"REFERENCE_ID\"\n"
-                        + "WHERE wct1.\"REFERENCE_TREE\" = 1 AND wct1.cte_level < %s\n"
-                        + ")\n"
-                        + "SELECT * \n"
-                        + "FROM \"as_tree_cte\" a \n"
-                        + "ORDER BY a.cte_level",
-                config.getId(),
-                //防止无限递归
-                1000);
-
-        List<GetReferenceConfigFunUse_Types> referenceConfigs = repository_Key.select()
-                                                                              .withSql(sql)
-                                                                              .toList(GetReferenceConfigFunUse_Types.class);
+        List<GetReferenceConfigFunUse_Types> referenceConfigs
+                = repository_Key.select()
+                                .withSql(
+                                        String.format("SELECT\n"
+                                                              + "\ta.`Id`,\n"
+                                                              + "\ta.`Level`,\n"
+                                                              + "\ta.`allowed_types`,\n"
+                                                              + "\ta.`prohibited_types`\n"
+                                                              + "FROM\n" +
+                                                              "\t(\n"
+                                                              + "\tSELECT\n"
+                                                              + "\t\tcte_tbc.cte_level,\n"
+                                                              + "\t\ta.`Id`,\n"
+                                                              + "\t\ta.`Level`,\n"
+                                                              + "\t\ta.`allowed_types`,\n"
+                                                              + "\t\ta.`prohibited_types`\n"
+                                                              + "\tFROM\n"
+                                                              +
+                                                              "\t\t(\n"
+                                                              + "\t\tSELECT\n"
+                                                              + "\t\t\t@cte_referenceIds AS cte_referenceIds,\n"
+                                                              + "\t\t\t( SELECT @cte_referenceIds := group_concat( `reference_id` ) FROM `common_file_upload_config` WHERE find_in_set( `Id`, @cte_referenceIds ) AND @cte_treeReference = 1 ) AS cte_cReferenceIds,\n"
+                                                              + "\t\t\t@cte_level := @cte_idcte_levels + 1 AS cte_level \n"
+                                                              + "\t\tFROM\n"
+                                                              + "\t\t\t`common_file_upload_config`,\n"
+                                                              + "\t\t\t(\n"
+                                                              + "\t\t\tSELECT\n"
+                                                              + "\t\t\t\t@cte_referenceIds := a.`reference_id`,\n"
+                                                              + "\t\t\t\t@cte_idcte_levels := 0 \n"
+                                                              + "\t\t\tFROM\n"
+                                                              + "\t\t\t\t`common_file_upload_config` a \n"
+                                                              + "\t\t\tWHERE\n"
+                                                              + "\t\t\t\t a.`Id` = '%s' \n"
+                                                              + "\t\t\t\tLIMIT 1 \n"
+                                                              + "\t\t\t) cte_tbb \n"
+                                                              + "\t\tWHERE\n"
+                                                              + "\t\t\t@cte_referenceIds IS NOT NULL \n"
+                                                              + "\t\t) cte_tbc,\n"
+                                                              + "\t\t`common_file_upload_config` a \n"
+                                                              + "\tWHERE\n"
+                                                              + "\t\tfind_in_set( a.`Id`, cte_tbc.cte_referenceIds ) \n"
+                                                              + "\t\tAND cte_tbc.cte_level < %s \n"
+                                                              + "\t\tAND (a.`allowed_types` IS NOT NULL OR a.`prohibited_types` IS NOT NULL) \n"
+                                                              + "\t) a \n"
+                                                              + "ORDER BY\n"
+                                                              + "\ta.cte_level DESC,\n"
+                                                              + "\ta.`Level`",
+                                                      config.getId(),
+                                                      //防止无限递归
+                                                      100),
+                                        DbType.JdbcMySQL8,
+                                        DbType.JdbcMariaDB10)
+                                //TODO 递归查询sql语句待完成
+                                .withSql(
+                                        String.format("WITH [as_tree_cte]\n"
+                                                              + "as\n"
+                                                              + "(\n"
+                                                              + "SELECT 1 AS [cte_level], [a].[Id], [a[.[ReferenceId], [a].[ReferenceTree]\n"
+                                                              + "FROM [dbo].[CommonFileUploadConfig] [a]\n"
+                                                              + "WHERE([a].[Id] = '%s')\n"
+                                                              + "\n"
+                                                              + "UNION ALL\n"
+                                                              + "\n"
+                                                              + "SELECT [wct1].[cte_level] + 1 AS [cte_level], [wct2].[Id], [wct2].[ReferenceId], [wct2].[ReferenceTree]\n"
+                                                              + "FROM [as_tree_cte] [wct1]\n"
+                                                              + "INNER JOIN [dbo].[CommonFileUploadConfig] [wct2] ON [wct2].[Id] = [wct1].[ReferenceId]\n"
+                                                              + "WHERE [wct1].[ReferenceTree] = 1 AND [wct1].[cte_level] < %s\n"
+                                                              + ")\n"
+                                                              + "SELECT COUNT(1)  FROM\n"
+                                                              + "(\n"
+                                                              + "SELECT [a].[Id], COUNT(1) [SUM]\n"
+                                                              + "FROM [as_tree_cte] [a]\n"
+                                                              + "ORDER BY a.cte_level ",
+                                                      config.getId(),
+                                                      //防止无限递归
+                                                      100),
+                                        DbType.JdbcSqlServer,
+                                        DbType.JdbcSqlServer_2012_plus)
+                                .withSql(
+                                        String.format(
+                                                "WITH \"as_tree_cte\"(cte_level, \"ID\", \"ALLOWED_TYPES\", \"PROHIBITED_TYPES\", \"REFERENCE_ID\" , \"REFERENCE_TREE\")\n"
+                                                        + "as\n"
+                                                        + "(\n"
+                                                        + "SELECT 0 as cte_level, a.\"ID\", a.\"ALLOWED_TYPES\", a.\"PROHIBITED_TYPES\", a.\"REFERENCE_ID\" , a.\"REFERENCE_TREE\"\n"
+                                                        + "FROM \"COMMON_FILE_UPLOAD_CONFIG\" a \n"
+                                                        + "WHERE (a.\"ID\" = '%s' AND a.\"ENABLE\" = 1)\n"
+                                                        + "\n"
+                                                        + "union all\n"
+                                                        + "\n"
+                                                        + "SELECT wct1.cte_level + 1 as cte_level, wct2.\"ID\", wct2.\"ALLOWED_TYPES\", wct2.\"PROHIBITED_TYPES\", wct2.\"REFERENCE_ID\" , wct2.\"REFERENCE_TREE\"  \n"
+                                                        + "FROM \"as_tree_cte\" wct1 \n"
+                                                        + "INNER JOIN \"COMMON_FILE_UPLOAD_CONFIG\" wct2 ON wct2.\"ID\" = wct1.\"REFERENCE_ID\"\n"
+                                                        + "WHERE wct1.\"REFERENCE_TREE\" = 1 AND wct1.cte_level < %s\n"
+                                                        + ")\n"
+                                                        + "SELECT * \n"
+                                                        + "FROM \"as_tree_cte\" a \n"
+                                                        + "ORDER BY a.cte_level",
+                                                config.getId(),
+                                                //防止无限递归
+                                                100),
+                                        DbType.JdbcDameng6,
+                                        DbType.JdbcDameng7,
+                                        DbType.JdbcDameng8,
+                                        DbType.JdbcOracle12c,
+                                        DbType.JdbcOracle18c,
+                                        DbType.JdbcOracle19c,
+                                        DbType.JdbcOracle21c)
+                                //TODO 递归查询sql语句待完成
+                                .withSql(
+                                        String.format("",
+                                                      config.getId(),
+                                                      //防止无限递归
+                                                      100),
+                                        DbType.JdbcPostgreSQL15)
+                                .toList(GetReferenceConfigFunUse_Types.class);
 
         if (CollectionsExtension.anyPlus(referenceConfigs))
             referenceConfigs.forEach(x -> unionConfigTypes(config,
