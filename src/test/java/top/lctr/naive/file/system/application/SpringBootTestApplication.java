@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 @org.springframework.boot.autoconfigure.SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},
                                                               scanBasePackages = {
                                                                       "project.extension",
-                                                                      "top.lctr"
+                                                                      "top.lctr.naive.file.system"
                                                               })
 public class SpringBootTestApplication {
     public static void main(String[] args) {

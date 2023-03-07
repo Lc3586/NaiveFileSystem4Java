@@ -31,7 +31,7 @@ public class AuthenticationService
 
     @Override
     public Operator getOperator() {
-        return null;
+        return new Operator();
     }
 
     @Override

@@ -112,9 +112,10 @@ public class SwaggerConfigure {
         // 用ApiInfoBuilder进行定制
         return new ApiInfoBuilder()
                 // 设置标题
-                .title("200501边检智能卡口系统ISC-SDK项目_接口文档")
+                .title(String.format("%s 接口文档",
+                                     serviceConfig.getName()))
                 // 描述
-                .description("用于管理人脸机、抓拍机...")
+                .description("用于上传和管理用户的文件")
                 // 作者信息
                 .contact(new Contact(serviceConfig.getName(),
                                      null,
