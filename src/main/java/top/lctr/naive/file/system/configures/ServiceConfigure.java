@@ -8,22 +8,23 @@ import top.lctr.naive.file.system.business.handler.ChunkFileMergeHandler;
 import top.lctr.naive.file.system.business.handler.FileRepairHandler;
 import top.lctr.naive.file.system.business.handler.Word2PdfHandler;
 
+import javax.annotation.PreDestroy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 /**
- * 启动各个服务
+ * 服务配置
  *
  * @author LCTR
  * @date 2023-03-03
  */
 @Component
 @Order(value = 1)
-public class StartService
+public class ServiceConfigure
         implements ApplicationRunner {
-    public StartService(ChunkFileMergeHandler chunkFileMergeHandler,
-                        FileRepairHandler fileRepairHandler,
-                        Word2PdfHandler word2PdfHandler) {
+    public ServiceConfigure(ChunkFileMergeHandler chunkFileMergeHandler,
+                            FileRepairHandler fileRepairHandler,
+                            Word2PdfHandler word2PdfHandler) {
         this.chunkFileMergeHandler = chunkFileMergeHandler;
         this.fileRepairHandler = fileRepairHandler;
         this.word2PdfHandler = word2PdfHandler;
@@ -57,5 +58,29 @@ public class StartService
                                    Executors.newSingleThreadExecutor());
         CompletableFuture.runAsync(word2PdfHandler::start,
                                    Executors.newSingleThreadExecutor());
+    }
+
+    /**
+     * 关闭各个服务
+     */
+    @PreDestroy
+    public void shutDown() {
+        try {
+            chunkFileMergeHandler.shutDown();
+        } catch (Exception ignore) {
+
+        }
+
+        try {
+            fileRepairHandler.shutDown();
+        } catch (Exception ignore) {
+
+        }
+
+        try {
+            word2PdfHandler.shutDown();
+        } catch (Exception ignore) {
+
+        }
     }
 }
