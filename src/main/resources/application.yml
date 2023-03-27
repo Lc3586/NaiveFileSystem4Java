@@ -104,7 +104,7 @@ project:
           nameConvertType: PascalCaseToUnderscoreWithLower
           properties:
             # 连接字符串
-            url: ENC(SSpORgVScIribVtil+Lmmcdd4bU7/X9kcI1/N48uo0V/slXQ9lBWfy6PxET0D0iDf7duz9UzIcB4SltcbYD6tehPCMpMwxBNFwgzAiD/EjIBryYib60rCUoP3qiPF1N9EhpjGjn/yXkzwAVdvAyPwmkOseNYAsL7XfLrycE+waGWyOg2WL3Sr2wmipJ0v9DezypCE2+j3rphrOoNiAfNa7EsZKJ9Fb4YgxeXSYFwMQlZKuI+OFcccb2Ug/QjIGFV)
+            url: ENC(zy1EaEe6RBSJN/NFl1bvZJmVWNzMaUIhw8fsvSSFVnZWUV066/FgoaArc1SWNqYkgPnYpIRAasOl8FiwpZktz1JHEVz1AI4WaETkaPEv1i4iJ/oXU37wbtfmWqbYwD7VTo2ZT5rYxW6SLTF9Mdip15E0IxKO46YYLBka24Q0/MmMQO70HJPzFkd1GyuIN3rWbqI9y+ANrPK7SAgv/ZsF6gP5Donuxvcxupjy8H/HHMGg2lLB00k9aYZ6mzrcgMxLFLi7RaiiLeM=)
             # 用户名
             username: ENC(LWfGadRuyaYT3ZIEFoEs/w==)
             # 密码
