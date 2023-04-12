@@ -56,7 +56,7 @@
         <maven.test.skip>true</maven.test.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <server.id>rdc-releases</server.id>
-        <project.extension.model.version>1.0.3-SNAPSHOT</project.extension.model.version>
+        <project.extension.model.version>1.0.4-SNAPSHOT</project.extension.model.version>
         <!--    请勿升级SpringBoot版本！    -->
         <spring.boot.version>2.7.5</spring.boot.version>
         <spring.framework.version>5.3.23</spring.framework.version>
@@ -394,6 +394,12 @@
             <artifactId>spring-boot-dependencies</artifactId>
             <version>${spring.boot.version}</version>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring.boot.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <!--logback-->

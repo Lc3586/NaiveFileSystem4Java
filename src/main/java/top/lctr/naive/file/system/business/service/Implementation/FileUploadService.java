@@ -14,8 +14,8 @@ import project.extension.collections.CollectionsExtension;
 import project.extension.file.FileDownloadInfo;
 import project.extension.file.FileExtension;
 import project.extension.file.PathExtension;
+import project.extension.standard.authentication.AuthenticationInfo;
 import project.extension.standard.authentication.IAuthenticationService;
-import project.extension.standard.authentication.Operator;
 import project.extension.standard.exception.BusinessException;
 import project.extension.string.StringExtension;
 import sun.misc.BASE64Decoder;
@@ -479,8 +479,8 @@ public class FileUploadService
                                                               filename,
                                                               PersonalFileState.可用,
                                                               authenticationService.tryGetOperator()
-                                                                                   .orElse(new Operator())
-                                                                                   .getUsername());
+                                                                                   .orElse(new AuthenticationInfo())
+                                                                                   .getName());
                 } catch (Exception ignore) {
 
                 }
@@ -656,8 +656,8 @@ public class FileUploadService
                                                               filename,
                                                               PersonalFileState.可用,
                                                               authenticationService.tryGetOperator()
-                                                                                   .orElse(new Operator())
-                                                                                   .getUsername());
+                                                                                   .orElse(new AuthenticationInfo())
+                                                                                   .getName());
                 } catch (Exception ignore) {
 
                 }

@@ -2,10 +2,10 @@ package top.lctr.naive.file.system.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
+import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import lombok.Data;
 import org.apache.ibatis.type.Alias;
 import project.extension.mybatis.edge.annotations.ColumnSetting;
 import project.extension.mybatis.edge.annotations.TableSetting;
@@ -24,6 +24,7 @@ import java.util.Date;
 @TableSetting
 @Alias("CommonChunkFile")
 @JSONType(ignores = "serialVersionUID")
+@Data
 public class CommonChunkFile {
     @ColumnSetting(isIgnore = true)
     @OpenApiIgnore
@@ -100,6 +101,8 @@ public class CommonChunkFile {
     @OpenApiDescription("字节数")
     @OpenApiSubTag({"List",
                     "Detail"})
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @JSONField(serializeUsing = ToStringSerializer.class)
     private Long bytes;
 
     /**
@@ -148,182 +151,4 @@ public class CommonChunkFile {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * 主键
-     */
-    public String getId() {
-        return id;
-    }
-
-    public void setServerKey(String serverKey) {
-        this.serverKey = serverKey;
-    }
-
-    /**
-     * 服务器标识
-     */
-    public String getServerKey() {
-        return serverKey;
-    }
-
-    public void setTaskKey(String taskKey) {
-        this.taskKey = taskKey;
-    }
-
-    /**
-     * 任务标识
-     */
-    public String getTaskKey() {
-        return taskKey;
-    }
-
-    public void setFileMd5(String fileMd5) {
-        this.fileMd5 = fileMd5;
-    }
-
-    /**
-     * 文件MD5校验值
-     */
-    public String getFileMd5() {
-        return fileMd5;
-    }
-
-    public void setMd5(String md5) {
-        this.md5 = md5;
-    }
-
-    /**
-     * 分片MD5校验值
-     */
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    /**
-     * 分片索引
-     */
-    public Integer getIndex() {
-        return index;
-    }
-
-    public void setSpecs(Integer specs) {
-        this.specs = specs;
-    }
-
-    /**
-     * 分片规格
-     */
-    public Integer getSpecs() {
-        return specs;
-    }
-
-    public void setBytes(Long bytes) {
-        this.bytes = bytes;
-    }
-
-    /**
-     * 字节数
-     */
-    public Long getBytes() {
-        return bytes;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    /**
-     * 文件大小
-     */
-    public String getSize() {
-        return size;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    /**
-     * 文件相对路径
-     */
-    public String getPath() {
-        return path;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * 状态
-     *
-     * @see top.lctr.naive.file.system.dto.FileState
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * 创建者
-     */
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
-    }
-
-    /**
-     * 创建时间
-     */
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this,
-                                   ToStringStyle.MULTI_LINE_STYLE)
-                .append("id",
-                        getId())
-                .append("serverKey",
-                        getServerKey())
-                .append("taskKey",
-                        getTaskKey())
-                .append("fileMd5",
-                        getFileMd5())
-                .append("md5",
-                        getMd5())
-                .append("index",
-                        getIndex())
-                .append("specs",
-                        getSpecs())
-                .append("bytes",
-                        getBytes())
-                .append("size",
-                        getSize())
-                .append("path",
-                        getPath())
-                .append("state",
-                        getState())
-                .append("createBy",
-                        getCreateBy())
-                .append("createTime",
-                        getCreateTime())
-                .toString();
-    }
 }

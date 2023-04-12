@@ -5,8 +5,7 @@ import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import lombok.Data;
 import org.apache.ibatis.type.Alias;
 import project.extension.mybatis.edge.annotations.ColumnSetting;
 import project.extension.mybatis.edge.annotations.TableSetting;
@@ -25,6 +24,7 @@ import java.util.Date;
 @TableSetting
 @Alias("CommonFile")
 @JSONType(ignores = "serialVersionUID")
+@Data
 public class CommonFile {
     @ColumnSetting(isIgnore = true)
     @OpenApiIgnore
@@ -143,186 +143,4 @@ public class CommonFile {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * 主键
-     */
-    public String getId() {
-        return id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * 名称
-     */
-    public String getName() {
-        return name;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    /**
-     * 文件类型
-     *
-     * @see top.lctr.naive.file.system.dto.FileType
-     */
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    /**
-     * 内容类型
-     */
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setExtension(String extension) {
-        this.extension = extension;
-    }
-
-    /**
-     * 文件扩展名
-     */
-    public String getExtension() {
-        return extension;
-    }
-
-    public void setMd5(String md5) {
-        this.md5 = md5;
-    }
-
-    /**
-     * MD5校验值
-     */
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setServerKey(String serverKey) {
-        this.serverKey = serverKey;
-    }
-
-    /**
-     * 服务器标识
-     */
-    public String getServerKey() {
-        return serverKey;
-    }
-
-    public void setStorageType(String storageType) {
-        this.storageType = storageType;
-    }
-
-    /**
-     * 存储类型
-     *
-     * @see top.lctr.naive.file.system.dto.StorageType
-     */
-    public String getStorageType() {
-        return storageType;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    /**
-     * 文件相对路径
-     */
-    public String getPath() {
-        return path;
-    }
-
-    public void setBytes(Long bytes) {
-        this.bytes = bytes;
-    }
-
-    /**
-     * 字节数
-     */
-    public Long getBytes() {
-        return bytes;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    /**
-     * 文件大小
-     */
-    public String getSize() {
-        return size;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * 状态
-     *
-     * @see top.lctr.naive.file.system.dto.FileState
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * 创建时间
-     */
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this,
-                                   ToStringStyle.MULTI_LINE_STYLE)
-                .append("id",
-                        getId())
-                .append("name",
-                        getName())
-                .append("fileType",
-                        getFileType())
-                .append("contentType",
-                        getContentType())
-                .append("extension",
-                        getExtension())
-                .append("md5",
-                        getMd5())
-                .append("serverKey",
-                        getServerKey())
-                .append("storageType",
-                        getStorageType())
-                .append("path",
-                        getPath())
-                .append("bytes",
-                        getBytes())
-                .append("size",
-                        getSize())
-                .append("state",
-                        getState())
-                .append("createTime",
-                        getCreateTime())
-                .toString();
-    }
 }

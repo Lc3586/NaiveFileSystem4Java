@@ -3,8 +3,8 @@ package top.lctr.naive.file.system.business.service.Implementation;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import project.extension.standard.authentication.AuthenticationInfo;
 import project.extension.standard.authentication.IAuthenticationService;
-import project.extension.standard.authentication.Operator;
 
 import java.util.Optional;
 
@@ -30,12 +30,12 @@ public class AuthenticationService
     }
 
     @Override
-    public Operator getOperator() {
-        return new Operator();
+    public AuthenticationInfo getOperator() {
+        return new AuthenticationInfo();
     }
 
     @Override
-    public Optional<Operator> tryGetOperator() {
+    public Optional<AuthenticationInfo> tryGetOperator() {
         return Optional.empty();
     }
 
